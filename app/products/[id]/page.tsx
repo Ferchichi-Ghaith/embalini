@@ -143,7 +143,7 @@ const ProductPage = () => {
                     {accountType === "COMPANY" ? "B2B Exclusive Rate" : "Retail Price"}
                   </p>
                   <h2 className="text-5xl font-light">
-                    {(product.price * quantity).toFixed(2)}<span className="text-xl ml-1">€</span>
+                    {(product.price * quantity).toFixed(2)}<span className="text-xl ml-1">TND</span>
                   </h2>
                </div>
                <div className="flex items-center bg-[#F4F4F4] rounded-2xl p-2 border border-black/5">

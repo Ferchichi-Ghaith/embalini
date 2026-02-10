@@ -9,42 +9,42 @@ const products = [
   {
     id: "1",
     title: "Coffret Signature",
-    price: "45.00€",
+    price: "45.00 TND",
     image: "/images/p1.jpg",
     etat: "Premium"
   },
   {
     id: "2",
     title: "Étui Minimaliste",
-    price: "29.00€",
+    price: "29.00 TND",
     image: "/images/p2.png",
     etat: "Stock Limité"
   },
   {
     id: "3",
     title: "Enveloppe Kraft Luxe",
-    price: "12.00€",
+    price: "12.00 TND",
     image: "/images/p3.png",
     etat: "Eco-Conçu"
   },
   {
     id: "4",
     title: "Coffret Signature",
-    price: "45.00€",
+    price: "45.00 TND",
     image: "/images/p1.jpg",
     etat: "Premium"
   },
   {
     id: "5",
     title: "Étui Minimaliste",
-    price: "29.00€",
+    price: "29.00 TND",
     image: "/images/p2.png",
     etat: "Stock Limité"
   },
   {
     id: "6",
     title: "Enveloppe Kraft Luxe",
-    price: "12.00€",
+    price: "12.00 TND",
     image: "/images/p3.png",
     etat: "Eco-Conçu"
   }
