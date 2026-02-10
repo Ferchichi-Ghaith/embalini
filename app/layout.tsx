@@ -78,13 +78,13 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#FBFBFB] min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
         <Navbar />
        
           {children}
         
-        <Footer />
+       
       </body>
     </html>
   );
