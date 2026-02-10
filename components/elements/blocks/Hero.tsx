@@ -1,26 +1,7 @@
-"use client";
 
-import React, { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring, Variants } from "framer-motion";
-import { ArrowRight, ShieldCheck } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight,  } from "lucide-react";
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.15, delayChildren: 0.3 },
-  },
-};
 
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
-  },
-};
 
 const EmbaliniHero = () => {
 
@@ -37,7 +18,7 @@ const EmbaliniHero = () => {
         <img 
           src="https://img.freepik.com/free-vector/vector-abstract-green-background-template_474888-2577.jpg" 
           alt="Embalini Premium Packaging"
-          className="w-full h-full object-cover opacity-95 grayscale-1"
+          className="w-full h-full object-cover  "
         />
       </div>
 
