@@ -42,11 +42,11 @@ const ShowcasePage = () => {
       <section className="relative z-10 pt-40 pb-40 px-6 md:px-12 max-w-[1600px] mx-auto">
         
         {/* 2. DYNAMIC HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-32 border-b border-white/10 pb-16">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-32 border-b border-white/10 pb-6">
           <div className="max-w-2xl space-y-8">
            
-            <h1 className="text-7xl md:text-[8rem] font-black uppercase tracking-tighter italic leading-[0.75]">
-           Notre Solutions <br /> <span className="text-[#A3E635]">d'Emballage.</span>
+            <h1 className="text-5xl md:text-[8rem] font-black uppercase tracking-tighter italic leading-[0.75]">
+              Notre Solutions <br /> <span className="text-[#A3E635]">d'Emballage.</span>
             </h1>
           </div>
           
