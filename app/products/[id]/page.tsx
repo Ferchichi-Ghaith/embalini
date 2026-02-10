@@ -128,7 +128,7 @@ const ProductPage = () => {
             {/* Title Block */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <span className="h-[1px] w-12 bg-black/20" />
+                <span className="h-px w-12 bg-black/20" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-black/40">{product.subtitle}</span>
               </div>
               <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter leading-[0.85] italic">
@@ -137,7 +137,7 @@ const ProductPage = () => {
             </div>
 
             {/* Pricing Card */}
-            <div className="p-8 rounded-[32px] bg-white border border-black/5 shadow-2xl shadow-black/[0.02] flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
+            <div className="p-8 rounded-[32px] bg-white border border-black/5 shadow-2xl shadow-black/2 flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
                <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-black/40 mb-1">
                     {accountType === "COMPANY" ? "B2B Exclusive Rate" : "Retail Price"}
@@ -178,7 +178,7 @@ const ProductPage = () => {
               <motion.button 
                 whileHover={{ scale: 1.01, backgroundColor: "#000", color: "#A3E635" }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-8 bg-[#A3E635] text-black rounded-[24px] font-black uppercase tracking-[0.1em] text-xs flex items-center justify-center gap-2 shadow-xl shadow-[#A3E635]/20 transition-all duration-500"
+                className="w-full py-8 bg-[#A3E635] text-black rounded-[24px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl shadow-[#A3E635]/20 transition-all duration-500"
               >
                 Start Request <ArrowRight size={18} />
               </motion.button>
