@@ -1,9 +1,7 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 interface ProductProps {
@@ -44,7 +42,11 @@ const ProductCard = ({ id, title, price, image, etat }: ProductProps) => {
 
         {/* Bouton "View Details" flottant qui apparaît au survol */}
         <motion.div 
-          className="absolute bottom-6 left-6 right-6 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100"
+         className="absolute bottom-6 left-6 right-6 transition-all duration-500 
+       
+         opacity-100 translate-y-0 
+   
+         sm:opacity-0 sm:translate-y-4 sm:group-hover:opacity-100 sm:group-hover:translate-y-0"
         >
           <Link 
             href={`/products/${id}`}
