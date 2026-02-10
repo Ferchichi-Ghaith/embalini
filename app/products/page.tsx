@@ -75,14 +75,7 @@ const ShowcasePage = () => {
         </div>
       </section>
 
-      {/* 4. DESIGNER FOOTER */}
-      <footer className="relative z-10 py-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center px-12 gap-8 text-[10px] font-bold uppercase tracking-[0.5em] opacity-40">
-        <p>© 2026 — Global Packaging Standards</p>
-        <div className="flex gap-8">
-          <button className="hover:text-[#A3E635] transition-colors">Sustainability Index</button>
-          <button className="hover:text-[#A3E635] transition-colors">Legal</button>
-        </div>
-      </footer>
+     
     </main>
   );
 };
