@@ -1,5 +1,6 @@
 "use client";
 
+import {CTA} from '@/components/elements/blocks/CTA';
 import Footer from '@/components/elements/blocks/Footer';
 import EmbaliniHero from '@/components/elements/blocks/Hero';
 import ProductCard from '@/components/elements/utils/productcard';
@@ -95,7 +96,7 @@ const Page = () => {
           ))}
         </div>
       </section>
-
+      <CTA/>
    
       <Footer />
     </main>
