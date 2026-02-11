@@ -98,7 +98,7 @@ const Page = () => {
       </section>
       <CTA/>
    
-      <Footer />
+     
     </main>
   );
 };

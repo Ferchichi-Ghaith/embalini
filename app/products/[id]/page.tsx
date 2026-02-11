@@ -94,7 +94,6 @@ const ProductPage = () => {
 
   // Parallax & Reveal Effects
   const yImage = useTransform(scrollY, [0, 500], [0, -50]);
-  const opacityNav = useTransform(scrollY, [0, 100], [0, 1]);
 
   return (
     <div className="min-h-screen bg-[#FBFBFB] text-[#1A1A1A] selection:bg-[#A3E635]">
