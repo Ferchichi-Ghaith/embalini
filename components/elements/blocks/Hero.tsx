@@ -50,7 +50,7 @@ const EmbaliniHero = () => {
            
             className="text-[15vw] md:text-[11rem] font-[1000] leading-[0.75] tracking-[-0.07em] uppercase text-black italic drop-shadow-sm"
           >
-            Embalini<span className="text-[#A3E635] not-italic">.</span>
+            Embalini<span className="text-[#A3E635] not-italic ml-2">.</span>
           </h1>
           
           <div className="mt-8 overflow-hidden">
