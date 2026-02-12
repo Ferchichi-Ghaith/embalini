@@ -8,7 +8,7 @@ const EmbaliniHero = () => {
 
   return (
     <section 
-      className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden  selection:bg-[#A3E635] selection:text-black"
+      className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden   selection:bg-[#A3E635] selection:text-black"
     >
       {/* Background Image Container */}
       <div 
@@ -32,7 +32,7 @@ const EmbaliniHero = () => {
       >
         
         {/* Business Badge */}
-        <div  className="mb-6 group mt-2">
+        <div  className="mb-6 group mt-5">
           <div className="px-5 py-2 rounded-full border border-black/5 bg-white/40 backdrop-blur-xl shadow-sm flex items-center gap-3">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3E635] opacity-75"></span>

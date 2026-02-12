@@ -20,7 +20,7 @@ const BlogPostPage = ({ }) => {
   }, [params.id]);
   return (
     <main className=" selection:bg-[#A3E635] selection:text-black overflow-x-hidden scroll-pt-24 mt-4">
-      <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      <div className="fixed inset-0 z-100 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
       <section className="relative pt-20 md:pt-24 min-h-screen md:h-[95vh] flex flex-col md:flex-row border-b border-black/5">
         

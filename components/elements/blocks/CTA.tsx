@@ -64,16 +64,7 @@ export function CTA({ userAccountType = "INDIVIDUAL" }: CTAProps) {
             transition={{ duration: 0.6 }}
             className="flex flex-col space-y-8"
           >
-            {/* Context Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 w-fit">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-              </span>
-              <span className="text-xs font-bold tracking-wider uppercase text-primary">
-                {isCompany ? "Offre Entreprise" : "Solutions Particuliers"}
-              </span>
-            </div>
+         
             
             <div className="space-y-4">
               <h2 className="text-4xl md:text-6xl font-black leading-[1.1] tracking-tight text-foreground">
@@ -87,15 +78,7 @@ export function CTA({ userAccountType = "INDIVIDUAL" }: CTAProps) {
               </p>
             </div>
 
-            {/* Feature List */}
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {FEATURES.map((feature, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm font-medium text-foreground/80">
-                  <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
+          
 
             {/* CTA Actions */}
             <div className="flex flex-wrap gap-4 pt-4">
@@ -104,12 +87,7 @@ export function CTA({ userAccountType = "INDIVIDUAL" }: CTAProps) {
                 <ArrowRight className="w-4 h-4" />
               </button>
               
-              {isCompany && (
-                <button className="flex items-center gap-2 px-8 py-4 bg-white text-foreground border border-border font-bold rounded-xl hover:bg-muted transition-colors">
-                  <MessageSquare className="w-4 h-4" />
-                  Contacter un expert
-                </button>
-              )}
+            
             </div>
           </motion.div>
 

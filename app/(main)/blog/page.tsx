@@ -27,6 +27,27 @@ const BlogPage = ({ user = { accountType: 'INDIVIDUAL' } }) => {
       date: "JAN 2026",
       image: "/images/blog3.jpg"
     },
+    { 
+      id: "4", // blogid as 1
+      title: "L'art du packaging éco-responsable", 
+      etat: "new", 
+      date: "MAR 2026",
+      image: "/images/blog1.png"
+    },
+    { 
+      id: "5", // blogid as 2
+      title: "Logistique : Le secret des leaders", 
+      etat: "used", 
+      date: "FEB 2026",
+      image: "/images/blog2.jpg"
+    },
+    { 
+      id: "6", // blogid as 3
+      title: "Design minimaliste, impact maximal", 
+      etat: "used", 
+      date: "JAN 2026",
+      image: "/images/blog3.jpg"
+    },
   ];
 
   return (
