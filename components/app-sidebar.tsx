@@ -47,25 +47,21 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
+      title: "Produit",
       url: "#",
       icon: IconListDetails,
     },
     {
-      title: "Analytics",
+      title: "Blog",
       url: "#",
       icon: IconChartBar,
     },
     {
-      title: "Projects",
+      title: "Command",
       url: "#",
       icon: IconFolder,
     },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
+   
   ],
   navClouds: [
     {

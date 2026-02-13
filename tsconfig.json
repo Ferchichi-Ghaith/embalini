@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "components/elements/utils/productcard.jsx", "components/elements/utils/productcard.jsx"  ],
   "exclude": ["node_modules"]
 }

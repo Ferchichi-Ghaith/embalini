@@ -1,0 +1,87 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- ENUMS ---
+
+enum OrderStatus {
+  PENDING_REVIEW
+  CONFIRMED
+  SHIPPED
+  CANCELLED
+}
+
+// --- MODELS ---
+
+
+
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?
+  price       Decimal  @db.Decimal(10, 2)
+  image       String
+  etat        String   // Raw field "etat" for condition (e.g., Premium)
+  description String   @db.Text
+  specs       Json     // Array of {label, value} stored directly
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BlogPost {
+  id        String   @id @default(cuid())
+  title     String
+  etat      String   @default("new") // "new" or "used" from API
+  date      String   // Using String to keep "MAR 2026" format
+  readTime  String   
+  image     String   
+  content   String   @db.Text
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Commands {
+  id               String      @id @default(cuid())
+  order_id         String      @unique 
+  secret_code      String      
+  
+  // Order Info
+  nom              String
+  prenom           String
+  email            String
+  telephone        String
+  message          String?     @db.Text
+  date             DateTime    @default(now())
+  
+  // Financials
+  total_estimation Decimal     @db.Decimal(10, 2)
+  currency         String      @default("TND")
+  status           OrderStatus @default(PENDING_REVIEW)
+  
+  // Relation to items
+  items            CommandItem[]
+
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+model CommandItem {
+  id            String  @id @default(cuid())
+  original_id   String  // Reference to the Product id
+  titre         String
+  quantite      Int
+  prix_unitaire Decimal @db.Decimal(10, 2)
+  prix_total    Decimal @db.Decimal(10, 2)
+  productimage  String
+
+  commandId     String
+  command       Commands @relation(fields: [commandId], references: [id], onDelete: Cascade)
+}

@@ -23,11 +23,7 @@ const ShowcasePage = () => {
 
   // 2026 Interaction: Spring-based Parallax (adds physical weight to the scroll)
   const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
-  const slowScroll = useSpring(useTransform(scrollYProgress, [0, 1], [0, 120]), springConfig);
-  const fastScroll = useSpring(useTransform(scrollYProgress, [0, 1], [0, -120]), springConfig);
 
-  // User Context: Integrated your accountType field
-  const accountType = "COMPANY"; 
 
   return (
     <main ref={containerRef} className="relative min-h-screen overflow-hidden selection:bg-[#A3E635]  selection:text-black ">
