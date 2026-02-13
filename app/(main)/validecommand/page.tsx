@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, PackageCheck, CheckCircle2, Copy, Hash } from "lucide-react";
+import { ArrowLeft, PackageCheck, CheckCircle2, Copy } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const ValideCommandPage = () => {
+// --- COMPOSANT INTERNE (Logique de la page) ---
+const ValideCommandContent = () => {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   
-  // États pour le suivi de commande
   const [orderId, setOrderId] = useState("");
   const [secretCode, setSecretCode] = useState("");
 
@@ -42,14 +42,8 @@ const ValideCommandPage = () => {
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // LOGIQUE TEMPORELLE : Évite les répétitions sans base de données
     const now = Date.now();
-    
-    // ID : ORD + 6 derniers chiffres du timestamp (unique par milliseconde)
     const newOrderId = `ORD-${now.toString().slice(-6)}`;
-    
-    // SECRET CODE : Base36 conversion du timestamp (plus court et pro)
-    // On prend les 6 derniers caractères pour l'unicité immédiate
     const newSecretCode = now.toString(36).slice(-6).toUpperCase();
 
     setOrderId(newOrderId);
@@ -69,7 +63,6 @@ const ValideCommandPage = () => {
     };
 
     console.log("🚀 COMMANDE GÉNÉRÉE :", finalCommand);
-
     setIsSubmitted(true);
     
     if (typeof window !== "undefined") {
@@ -81,7 +74,6 @@ const ValideCommandPage = () => {
   if (isSubmitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FBFBFB] relative overflow-hidden pt-24 pb-20 px-6">
-        {/* Background Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#A3E635]/15 blur-[120px] rounded-full -z-10" />
   
         <motion.div 
@@ -89,7 +81,6 @@ const ValideCommandPage = () => {
           animate={{ opacity: 1, scale: 1 }}
           className="max-w-sm w-full"
         >
-          {/* Compact Header */}
           <div className="text-center mb-8">
             <motion.div 
               initial={{ scale: 0 }} animate={{ scale: 1 }}
@@ -101,12 +92,8 @@ const ValideCommandPage = () => {
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-black/40">Request Confirmed</p>
           </div>
   
-          {/* The Compact Ticket */}
           <div className="relative group">
-            {/* Main Card */}
             <div className="bg-white border border-black/[0.04] rounded-[32px] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.06)]">
-              
-              {/* Upper Section: Reference */}
               <div className="p-6 pb-4 flex justify-between items-end">
                 <div>
                   <p className="text-[8px] font-black uppercase tracking-widest text-black/30 mb-1">Reference ID</p>
@@ -118,17 +105,14 @@ const ValideCommandPage = () => {
                 </div>
               </div>
   
-              {/* Perforation Line */}
               <div className="relative flex items-center px-2">
                 <div className="absolute -left-3 w-6 h-6 bg-[#FBFBFB] rounded-full border border-black/[0.04]" />
                 <div className="w-full border-t-2 border-dashed border-black/[0.06]" />
                 <div className="absolute -right-3 w-6 h-6 bg-[#FBFBFB] rounded-full border border-black/[0.04]" />
               </div>
   
-              {/* Lower Section: Secret Code */}
               <div className="p-6 pt-5">
                 <p className="text-[8px] font-black uppercase tracking-widest text-center text-black/30 mb-4 italic">Tracking Secret Key</p>
-                
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -136,7 +120,6 @@ const ValideCommandPage = () => {
                   className="relative bg-black rounded-2xl p-5 cursor-pointer overflow-hidden group/code"
                 >
                   <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#A3E635]/10 to-transparent -translate-x-full group-hover/code:translate-x-full transition-transform duration-700" />
-                  
                   <div className="relative flex flex-col items-center">
                     <span className="font-mono text-3xl font-black text-[#A3E635] tracking-[0.4em] ml-[0.4em]">
                       {secretCode}
@@ -151,15 +134,12 @@ const ValideCommandPage = () => {
             </div>
           </div>
   
-          {/* Footer Actions */}
           <div className="mt-8 flex flex-col gap-3">
             <Link href="/products">
               <Button className="w-full h-14 bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:bg-neutral-900 transition-all">
                 Return to Catalog
               </Button>
             </Link>
-            <p className="text-[9px] text-center text-black/30 font-medium px-8 leading-relaxed">
-            </p>
           </div>
         </motion.div>
       </div>
@@ -169,8 +149,6 @@ const ValideCommandPage = () => {
   return (
     <div className="min-h-screen bg-[#FBFBFB] pt-32 pb-20 px-6">
       <div className="max-w-4xl mx-auto">
-        
-        {/* Header */}
         <div className="flex flex-col items-center text-center space-y-4 mb-16">
           <motion.div 
             initial={{ scale: 0 }} animate={{ scale: 1 }}
@@ -185,8 +163,6 @@ const ValideCommandPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          
-          {/* Section 1: Récapitulatif */}
           <section className="space-y-6">
             <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
               <span className="w-8 h-px bg-black/20" /> Votre Panier
@@ -215,60 +191,25 @@ const ValideCommandPage = () => {
             </div>
           </section>
 
-          {/* Section 2: Formulaire */}
           <section className="space-y-6">
             <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
               <span className="w-8 h-px bg-black/20" /> Vos Informations
             </h2>
             <form className="space-y-4" onSubmit={handleConfirm}>
               <div className="grid grid-cols-2 gap-4">
-                <input 
-                  required
-                  type="text" 
-                  placeholder="NOM" 
-                  className="bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm"
-                  onChange={(e) => setFormData({...formData, nom: e.target.value})}
-                />
-                <input 
-                  required
-                  type="text" 
-                  placeholder="PRÉNOM" 
-                  className="bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm"
-                  onChange={(e) => setFormData({...formData, prenom: e.target.value})}
-                />
+                <input required type="text" placeholder="NOM" className="bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm" onChange={(e) => setFormData({...formData, nom: e.target.value})} />
+                <input required type="text" placeholder="PRÉNOM" className="bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm" onChange={(e) => setFormData({...formData, prenom: e.target.value})} />
               </div>
-              <input 
-                required
-                type="email" 
-                placeholder="EMAIL PROFESSIONNEL" 
-                className="w-full bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm"
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-              />
-              <input 
-                required
-                type="text" 
-                placeholder="TÉLÉPHONE" 
-                className="w-full bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm"
-                onChange={(e) => setFormData({...formData, telephone: e.target.value})}
-              />
-              <textarea 
-                placeholder="MESSAGE / BESOINS SPÉCIFIQUES" 
-                rows={4} 
-                className="w-full bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm"
-                onChange={(e) => setFormData({...formData, message: e.target.value})}
-              />
-              
-              <button 
-                type="submit"
-                className="w-full py-6 bg-black text-[#A3E635] rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-[#A3E635] hover:text-black transition-all duration-500 shadow-xl shadow-black/10 active:scale-95"
-              >
+              <input required type="email" placeholder="EMAIL PROFESSIONNEL" className="w-full bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm" onChange={(e) => setFormData({...formData, email: e.target.value})} />
+              <input required type="text" placeholder="TÉLÉPHONE" className="w-full bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm" onChange={(e) => setFormData({...formData, telephone: e.target.value})} />
+              <textarea placeholder="MESSAGE / BESOINS SPÉCIFIQUES" rows={4} className="w-full bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest outline-none focus:border-[#A3E635] transition-colors shadow-sm" onChange={(e) => setFormData({...formData, message: e.target.value})} />
+              <button type="submit" className="w-full py-6 bg-black text-[#A3E635] rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-[#A3E635] hover:text-black transition-all duration-500 shadow-xl shadow-black/10 active:scale-95">
                 Confirmer 
               </button>
             </form>
           </section>
         </div>
 
-        {/* Footer Link */}
         <div className="mt-20 text-center">
           <Link href="/products" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/40 hover:text-black transition-colors">
             <ArrowLeft size={14} /> Retourner au catalogue
@@ -279,4 +220,17 @@ const ValideCommandPage = () => {
   );
 };
 
-export default ValideCommandPage;
+// --- EXPORT PRINCIPAL (Avec le wrapper Suspense) ---
+export default function ValideCommandPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#FBFBFB]">
+        <div className="animate-pulse text-[10px] font-black uppercase tracking-[0.4em] text-black/20">
+          Chargement de la session...
+        </div>
+      </div>
+    }>
+      <ValideCommandContent />
+    </Suspense>
+  );
+}
