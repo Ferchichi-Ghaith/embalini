@@ -3,24 +3,36 @@ import { produitServices } from "./produit.service";
 
 export const produitController = new Elysia({ prefix: "/produit" })
   // GET /produit
-  .get("/", async () => {
-    return await produitServices.getAll();
+  .get("/", async ({ set }) => {
+    try {
+      const products = await produitServices.getAll();
+      return products;
+    } catch (e) {
+      return set(500, "Failed to fetch products");
+    }
   })
 
   // GET /produit/:id
-  .get("/:id", async ({ params: { id }, error }) => {
-    const product = await produitServices.getById(id);
-    if (!product) return error(404, "Product not found");
-    return product;
+  .get("/:id", async ({ params: { id }, set }) => {
+    try {
+      const product = await produitServices.getById(id);
+      if (!product) return set(404, "Product not found");
+      return product;
+    } catch (e) {
+      return set(500, "Failed to fetch product");
+    }
   })
 
   // POST /produit
   .post("/", async ({ body, set }) => {
-    const newProduct = await produitServices.create(body);
-    set.status = 201;
-    return newProduct;
+    try {
+      const newProduct = await produitServices.create(body);
+      set.status = 201;
+      return newProduct;
+    } catch (e) {
+      return set(500, "Failed to create product");
+    }
   }, {
-    // Basic validation using Elysia's TypeBox (t)
     body: t.Object({
       title: t.String(),
       subtitle: t.Optional(t.String()),
@@ -28,20 +40,20 @@ export const produitController = new Elysia({ prefix: "/produit" })
       image: t.String(),
       etat: t.String(),
       description: t.String(),
-      specs: t.Any() // Since we use JSONB in Postgres
+      specs: t.Any()
     })
   })
+
   // PATCH /produit/:id
-  .patch("/:id", async ({ params: { id }, body, error }) => {
+  .patch("/:id", async ({ params: { id }, body, set }) => {
     try {
       const updatedProduct = await produitServices.update(id, body);
+      if (!updatedProduct) return set(404, "Product not found or update failed");
       return updatedProduct;
     } catch (e) {
-      // Handles case where ID doesn't exist in DB
-      return error(404, "Product not found or update failed");
+      return set(500, "Internal server error");
     }
   }, {
-    // Validation: All fields are optional for a PATCH request
     body: t.Object({
       title: t.Optional(t.String()),
       subtitle: t.Optional(t.String()),
@@ -54,6 +66,12 @@ export const produitController = new Elysia({ prefix: "/produit" })
   })
 
   // DELETE /produit/:id
-  .delete("/:id", async ({ params: { id } }) => {
-    return await produitServices.delete(id);
+  .delete("/:id", async ({ params: { id }, set }) => {
+    try {
+      const deleted = await produitServices.delete(id);
+      if (!deleted) return set(404, "Product not found");
+      return { message: `Product ${id} deleted successfully` };
+    } catch (e) {
+      return set(500, "Failed to delete product");
+    }
   });
