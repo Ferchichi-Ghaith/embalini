@@ -7,34 +7,47 @@ export const BlogsController = new Elysia({
   // GET /blog
   .get("/", async ({ set }) => {
     try {
-      const posts = await BlogServices.getAll();
-      return posts;
+      const blogs = await BlogServices.getAll();
+      return blogs;
     } catch (e) {
-      return set(500, "Failed to fetch posts");
+      set.status = 500;
+      return { error: "Failed to fetch blogs" };
     }
   })
 
   // GET /blog/:id
   .get("/:id", async ({ params: { id }, set }) => {
-    const post = await BlogServices.getById(id);
-    if (!post) return set(404, "Post not found");
-    return post;
+    try {
+      const post = await BlogServices.getById(id);
+      if (!post) {
+        set.status = 404;
+        return { error: "Post not found" };
+      }
+      return post;
+    } catch (e) {
+      set.status = 500;
+      return { error: "Failed to fetch post" };
+    }
   })
 
   // PATCH /blog/:id
   .patch("/:id", async ({ params: { id }, body, set }) => {
     try {
       const updatedPost = await BlogServices.update(id, body);
-      if (!updatedPost) return set(404, "Post not found or update failed");
+      if (!updatedPost) {
+        set.status = 404;
+        return { error: "Post not found or update failed" };
+      }
       return updatedPost;
     } catch (e) {
-      return set(500, "Internal server error");
+      set.status = 500;
+      return { error: "Internal server error" };
     }
   }, {
     body: t.Object({
       title: t.Optional(t.String()),
       etat: t.Optional(t.String()),
-      date: t.Optional(t.String()), // Handles "MAR 2026"
+      date: t.Optional(t.String()), // e.g., "MAR 2026"
       readTime: t.Optional(t.String()),
       image: t.Optional(t.String()),
       content: t.Optional(t.String())
@@ -45,9 +58,13 @@ export const BlogsController = new Elysia({
   .delete("/:id", async ({ params: { id }, set }) => {
     try {
       const deleted = await BlogServices.delete(id);
-      if (!deleted) return set(404, "Post not found");
+      if (!deleted) {
+        set.status = 404;
+        return { error: "Post not found" };
+      }
       return { message: "Post deleted successfully" };
     } catch (e) {
-      return set(500, "Failed to delete post");
+      set.status = 500;
+      return { error: "Failed to delete post" };
     }
   });

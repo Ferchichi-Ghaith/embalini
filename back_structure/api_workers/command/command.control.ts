@@ -11,7 +11,8 @@ export const commandController = new Elysia({
       const commands = await commandServices.getAll();
       return commands;
     } catch (e) {
-      return set(500, "Failed to fetch commands");
+      set.status = 500;
+      return { error: "Failed to fetch commands" };
     }
   })
 
@@ -19,10 +20,14 @@ export const commandController = new Elysia({
   .get("/:id", async ({ params: { id }, set }) => {
     try {
       const command = await commandServices.getById(id);
-      if (!command) return set(404, "Command not found");
+      if (!command) {
+        set.status = 404;
+        return { error: "Command not found" };
+      }
       return command;
     } catch (e) {
-      return set(500, "Failed to fetch command");
+      set.status = 500;
+      return { error: "Failed to fetch command" };
     }
   })
 
@@ -30,10 +35,14 @@ export const commandController = new Elysia({
   .patch("/:id", async ({ params: { id }, body, set }) => {
     try {
       const updatedCommand = await commandServices.update(id, body);
-      if (!updatedCommand) return set(404, "Command not found or update failed");
+      if (!updatedCommand) {
+        set.status = 404;
+        return { error: "Command not found or update failed" };
+      }
       return updatedCommand;
     } catch (e) {
-      return set(500, "Internal server error");
+      set.status = 500;
+      return { error: "Internal server error" };
     }
   }, {
     body: t.Object({
@@ -45,9 +54,13 @@ export const commandController = new Elysia({
   .delete("/:id", async ({ params: { id }, set }) => {
     try {
       const deleted = await commandServices.delete(id);
-      if (!deleted) return set(404, "Command not found");
+      if (!deleted) {
+        set.status = 404;
+        return { error: "Command not found" };
+      }
       return { message: `Order ${id} deleted successfully` };
     } catch (e) {
-      return set(500, "Failed to delete command");
+      set.status = 500;
+      return { error: "Failed to delete command" };
     }
   });

@@ -8,7 +8,8 @@ export const produitController = new Elysia({ prefix: "/produit" })
       const products = await produitServices.getAll();
       return products;
     } catch (e) {
-      return set(500, "Failed to fetch products");
+      set.status = 500;
+      return { error: "Failed to fetch products" };
     }
   })
 
@@ -16,10 +17,14 @@ export const produitController = new Elysia({ prefix: "/produit" })
   .get("/:id", async ({ params: { id }, set }) => {
     try {
       const product = await produitServices.getById(id);
-      if (!product) return set(404, "Product not found");
+      if (!product) {
+        set.status = 404;
+        return { error: "Product not found" };
+      }
       return product;
     } catch (e) {
-      return set(500, "Failed to fetch product");
+      set.status = 500;
+      return { error: "Failed to fetch product" };
     }
   })
 
@@ -30,7 +35,8 @@ export const produitController = new Elysia({ prefix: "/produit" })
       set.status = 201;
       return newProduct;
     } catch (e) {
-      return set(500, "Failed to create product");
+      set.status = 500;
+      return { error: "Failed to create product" };
     }
   }, {
     body: t.Object({
@@ -48,10 +54,14 @@ export const produitController = new Elysia({ prefix: "/produit" })
   .patch("/:id", async ({ params: { id }, body, set }) => {
     try {
       const updatedProduct = await produitServices.update(id, body);
-      if (!updatedProduct) return set(404, "Product not found or update failed");
+      if (!updatedProduct) {
+        set.status = 404;
+        return { error: "Product not found or update failed" };
+      }
       return updatedProduct;
     } catch (e) {
-      return set(500, "Internal server error");
+      set.status = 500;
+      return { error: "Internal server error" };
     }
   }, {
     body: t.Object({
@@ -69,9 +79,13 @@ export const produitController = new Elysia({ prefix: "/produit" })
   .delete("/:id", async ({ params: { id }, set }) => {
     try {
       const deleted = await produitServices.delete(id);
-      if (!deleted) return set(404, "Product not found");
+      if (!deleted) {
+        set.status = 404;
+        return { error: "Product not found" };
+      }
       return { message: `Product ${id} deleted successfully` };
     } catch (e) {
-      return set(500, "Failed to delete product");
+      set.status = 500;
+      return { error: "Failed to delete product" };
     }
   });
