@@ -16,6 +16,44 @@ export const commandController = new Elysia({
     }
   })
 
+  // POST /command
+  .post("/", async ({ body, set }) => {
+    try {
+      const newOrder = await commandServices.create(body);
+      set.status = 201;
+      return newOrder;
+    } catch (e) {
+      console.error(e);
+      set.status = 500;
+      return { error: "Failed to create order" };
+    }
+  }, {
+    body: t.Object({
+      order_id: t.String(),
+      secret_code: t.String(),
+      nom: t.String(),
+      prenom: t.String(),
+      email: t.String({ format: 'email' }),
+      telephone: t.String(),
+      message: t.Optional(t.String()),
+      total_estimation: t.Number(), // Prisma Decimal accepts Number or String
+      currency: t.Optional(t.String({ default: "TND" })),
+      // Validation for nested items
+      items: t.Array(t.Object({
+        original_id: t.String(),
+        titre: t.String(),
+        quantite: t.Number({ minimum: 1 }),
+        prix_unitaire: t.Number(),
+        prix_total: t.Number(),
+        productimage: t.String()
+      }))
+    }),
+    detail: { 
+      tags: ['command'], 
+      summary: 'Place a new order with items'
+    }
+  })
+
   // GET /command/:id
   .get("/:id", async ({ params: { id }, set }) => {
     try {

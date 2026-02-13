@@ -14,6 +14,30 @@ export const BlogsController = new Elysia({
       return { error: "Failed to fetch blogs" };
     }
   })
+  // 1. CREATE /blog
+  .post("/", async ({ body, set }) => {
+    try {
+      const newPost = await BlogServices.create(body);
+      set.status = 201; // Created
+      return newPost;
+    } catch (e) {
+      set.status = 500;
+      return { error: "Failed to create blog post" };
+    }
+  }, {
+    body: t.Object({
+      title: t.String({ minLength: 3 }),
+      etat: t.Union([t.Literal('new'), t.Literal('used')], { 
+        default: 'new',
+        description: "Must be 'new' or 'used'" 
+      }),
+      date: t.String({ example: "MAR 2026" }),
+      readTime: t.String(),
+      image: t.String(),
+      content: t.String()
+    }),
+    detail: { tags: ['blog'], summary: 'Create a new blog post' }
+  })
 
   // GET /blog/:id
   .get("/:id", async ({ params: { id }, set }) => {

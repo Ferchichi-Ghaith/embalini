@@ -10,6 +10,20 @@ export const commandServices = {
     });
   },
 
+  // Create command with nested items
+  create: async (data: any) => {
+    const { items, ...orderData } = data;
+    return await prisma.commands.create({
+      data: {
+        ...orderData,
+        items: {
+          create: items // Prisma handles the linking automatically
+        }
+      },
+      include: { items: true }
+    });
+  },
+
   // Fetch a single commands with its items
   getById: async (id: string) => {
     return await prisma.commands.findUnique({
