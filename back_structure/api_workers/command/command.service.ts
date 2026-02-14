@@ -25,10 +25,14 @@ export const commandServices = {
   },
 
   // Fetch a single commands with its items
-  getById: async (id: string) => {
+  getBySecret: async (secret_code: string) => {
     return await prisma.commands.findUnique({
-      where: { id },
-      include: { items: true }
+      where: { 
+        secret_code: secret_code 
+      },
+      include: { 
+        items: true,
+      }
     });
   },
 

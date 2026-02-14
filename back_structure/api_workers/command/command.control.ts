@@ -54,20 +54,24 @@ export const commandController = new Elysia({
     }
   })
 
-  // GET /command/:id
-  .get("/:id", async ({ params: { id }, set }) => {
-    try {
-      const command = await commandServices.getById(id);
-      if (!command) {
-        set.status = 404;
-        return { error: "Command not found" };
-      }
-      return command;
-    } catch (e) {
-      set.status = 500;
-      return { error: "Failed to fetch command" };
+// Change "/:id" to "/:secret_code"
+.get("/:secret_code", async ({ params: { secret_code }, set }) => {
+  try {
+    // Now secret_code will actually contain the string from the URL
+    const command = await commandServices.getBySecret(secret_code);
+    
+    if (!command) {
+      set.status = 404;
+      return { error: "no exist" };
     }
-  })
+    
+    return command;
+  } catch (e) {
+    console.error(e); // Log the error to see exactly why it fails
+    set.status = 500;
+    return { error: "Failed to fetch command" };
+  }
+})
 
   // PATCH /command/:id
   .patch("/:id", async ({ params: { id }, body, set }) => {

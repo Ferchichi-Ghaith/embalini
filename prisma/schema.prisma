@@ -48,7 +48,7 @@ model BlogPost {
 model Commands {
   id               String      @id @default(cuid())
   order_id         String      @unique 
-  secret_code      String      
+  secret_code      String      @unique    
   
   // Order Info
   nom              String

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, ShoppingCart, Trash2 } from "lucide-react";
+import { Menu, ShoppingCart, Trash2, Search, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,7 @@ export function Navbar() {
           </h1>
         </Link>
 
-        {/* DESKTOP NAV avec TextRoll */}
+        {/* DESKTOP NAV */}
         <nav className="hidden md:flex items-center gap-10">
           {navigationItems.map((item) => (
             <Link key={item.href} href={item.href}>
@@ -80,6 +80,7 @@ export function Navbar() {
               </TextRoll>
             </Link>
           ))}
+          
         </nav>
 
         <div className="flex items-center gap-4">
@@ -103,13 +104,11 @@ export function Navbar() {
                   <DrawerDescription>Vous avez {cartItems.length} article(s) dans votre sélection.</DrawerDescription>
                 </DrawerHeader>
                 
-                <div className="p-4 max-h-[50vh] overflow-y-auto">
+                <div className="p-4 max-h-[40vh] overflow-y-auto">
                   {cartItems.length > 0 ? (
                     <div className="space-y-4">
                       {cartItems.map((item, index) => (
                         <div key={index} className="flex items-center gap-4 border-b pb-4 group">
-                          
-                          {/* Image */}
                           <div className="h-16 w-16 rounded-xl bg-[#F4F4F4] overflow-hidden flex-shrink-0 border border-black/5">
                             <img 
                               src={item.productimage || "/placeholder.png"} 
@@ -117,15 +116,11 @@ export function Navbar() {
                               className="h-full w-full object-contain p-1"
                             />
                           </div>
-                          
-                          {/* Infos */}
                           <div className="flex-grow">
                             <p className="font-bold uppercase text-sm leading-tight text-black">{item.titre}</p>
                             <p className="text-xs text-gray-500">Qté: {item.quantite}</p>
                             <p className="font-black text-xs mt-1 text-black">{item.prix_total} TND</p>
                           </div>
-                          
-                          {/* Bouton Supprimer */}
                           <Button 
                             variant="ghost" 
                             size="icon" 
@@ -138,7 +133,7 @@ export function Navbar() {
                       ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                    <div className="flex flex-col items-center justify-center py-5 space-y-2">
                       <div className="p-4 bg-gray-50 rounded-full text-gray-300">
                         <ShoppingCart size={40} />
                       </div>
@@ -147,36 +142,47 @@ export function Navbar() {
                   )}
                 </div>
 
-                <DrawerFooter className="gap-2">
-                <Button 
-  // Désactive le bouton si le tableau est vide (0)
-  disabled={cartItems.length === 0}
-  onClick={() => {
-    // Sécurité supplémentaire : on ne fait rien si le panier est vide
-    if (cartItems.length === 0) return;
+                <DrawerFooter className="gap-2 pt-6 border-t">
+                  <Button 
+                    disabled={cartItems.length === 0}
+                    onClick={() => {
+                      if (cartItems.length === 0) return;
+                      // Encodage base64 pour passer les données (optionnel selon votre logique /validecommand)
+                      // const cartData = btoa(JSON.stringify(cartItems));
+                      window.location.href = `/validecommand`;
+                    }}
+                    className={cn(
+                      "w-full font-black uppercase tracking-widest transition-all py-7 rounded-2xl",
+                      cartItems.length > 0 
+                        ? "bg-[#A3E635] text-black hover:bg-black hover:text-[#A3E635] cursor-pointer" 
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed opacity-70"
+                    )}
+                  >
+                    {cartItems.length > 0 ? "Valider la commande" : "Panier Vide"}
+                  </Button>
+                  
+                  <div className="flex flex-col gap-2 w-full mt-2">
+                    <DrawerClose asChild>
+                      <Link href="/products" className="w-full">
+                        <Button 
+                          variant="ghost" 
+                          className="w-full text-[10px] uppercase font-bold tracking-widest opacity-50 hover:opacity-100 transition-opacity"
+                        >
+                          Continuer mes achats
+                        </Button>
+                      </Link>
+                    </DrawerClose>
 
-    const cartData = btoa(JSON.stringify(cartItems));
-    window.location.href = `/validecommand`;
-  }}
-  className={cn(
-    "w-full font-black uppercase tracking-widest transition-all py-7 rounded-2xl",
-    cartItems.length > 0 
-      ? "bg-[#A3E635] text-black hover:bg-black hover:text-[#A3E635] cursor-pointer" 
-      : "bg-gray-100 text-gray-400 cursor-not-allowed opacity-70" // Style quand désactivé
-  )}
->
-  {cartItems.length > 0 ? "Valider la commande" : "Panier Vide"}
-</Button>
-                  <DrawerClose asChild>
-    <Link href="/products" className="w-full">
-      <Button 
-        variant="ghost" 
-        className="w-full text-[10px] uppercase font-bold tracking-widest opacity-50 hover:opacity-100 transition-opacity"
-      >
-        Continuer mes achats
-      </Button>
-    </Link>
-  </DrawerClose>
+                    <Link href="/check-command" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-dashed border-black/20 text-[10px] uppercase font-bold tracking-widest hover:bg-gray-50 transition-all py-5 rounded-xl flex gap-2"
+                      >
+                        <ClipboardList size={14} />
+                        Suivre ma commande
+                      </Button>
+                    </Link>
+                  </div>
                 </DrawerFooter>
               </div>
             </DrawerContent>
@@ -192,7 +198,7 @@ export function Navbar() {
               </SheetTrigger>
               <SheetContent side="right" className="w-full bg-black text-white border-none flex flex-col items-center justify-center">
                 <DialogTitle className="sr-only">Menu de navigation</DialogTitle>
-                <ul className="space-y-8 text-center">
+                <ul className="space-y-8 text-center flex flex-col items-center">
                   {navigationItems.map((item) => (
                     <li key={item.name}>
                       <SheetClose asChild>
@@ -202,6 +208,18 @@ export function Navbar() {
                       </SheetClose>
                     </li>
                   ))}
+
+                  {/* BOUTON SUIVI COMMANDE MOBILE */}
+                  <li className=" w-full px-10">
+                    <SheetClose asChild>
+                      <Link href="/check-command">
+                        <Button variant="outline" className="w-full bg-[#A3E635] cursor-pointer text-black font-black uppercase italic py-7 rounded-2xl  flex gap-3">
+                          <Search size={20} />
+                          Suivre ma commande
+                        </Button>
+                      </Link>
+                    </SheetClose>
+                  </li>
                 </ul>
               </SheetContent>
             </Sheet>
@@ -212,7 +230,7 @@ export function Navbar() {
   );
 }
 
-// COMPOSANT TEXTROLL RÉINTÉGRÉ
+// COMPOSANT TEXTROLL
 const TextRoll = ({ children, className }: { children: string; className?: string }) => {
   return (
     <motion.span initial="initial" whileHover="hovered" className={cn("relative block overflow-hidden", className)} aria-label={children}>
