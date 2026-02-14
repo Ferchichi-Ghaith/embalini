@@ -24,10 +24,8 @@ enum OrderStatus {
 model Product {
   id          String   @id @default(cuid())
   title       String
-  subtitle    String?
   price       Decimal  @db.Decimal(10, 2)
   image       String
-  etat        String   // Raw field "etat" for condition (e.g., Premium)
   description String   @db.Text
   specs       Json     // Array of {label, value} stored directly
   
@@ -38,7 +36,6 @@ model Product {
 model BlogPost {
   id        String   @id @default(cuid())
   title     String
-  etat      String   @default("new") // "new" or "used" from API
   date      String   // Using String to keep "MAR 2026" format
   readTime  String   
   image     String   

@@ -9,10 +9,9 @@ interface ProductProps {
   title: string;
   price: string;
   image: string;
-  etat: string; // "Premium", "Édition Limitée", etc.
 }
 
-const ProductCard = ({ id, title, price, image, etat }: ProductProps) => {
+const ProductCard = ({ id, title, price, image}: ProductProps) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -23,12 +22,7 @@ const ProductCard = ({ id, title, price, image, etat }: ProductProps) => {
       {/* Container de l'image avec overflow-hidden pour l'effet de zoom */}
       <div className="relative aspect-6/5 w-full overflow-hidden rounded-3xl bg-[#F3F3F3]">
         
-        {/* Badge d'état (API Data) */}
-        <div className="absolute top-4 left-4 z-20">
-          <span className="px-3 py-1 rounded-full bg-white/80 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-black shadow-sm border border-black/5">
-            {etat}
-          </span>
-        </div>
+       
 
         {/* Image avec animation de survol */}
         <motion.img

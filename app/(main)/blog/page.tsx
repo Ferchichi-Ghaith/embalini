@@ -1,54 +1,56 @@
-import React from 'react';
-import { ArrowRight } from "lucide-react";
+'use client';
+import React, { useState, useEffect } from 'react';
+import { ArrowRight, Loader2 } from "lucide-react";
 import Link from 'next/link';
 
-const BlogPage = ({ user = { accountType: 'INDIVIDUAL' } }) => {
+// Interface basée sur votre schéma Prisma + champ 'etat' de l'API
+export interface BlogPost {
+  id: string;
+  title: string;
+  date: string;     // format "MAR 2026"
+  readTime: string;
+  image: string;
+  content: string;
+  etat: 'new' | 'used'; // Champ provenant de la donnée brute API
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface BlogPageProps {
+  user?: {
+    accountType: 'COMPANY' | 'INDIVIDUAL';
+  };
+}
+
+const BlogPage = ({ user = { accountType: 'INDIVIDUAL' } }: BlogPageProps) => {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const isCompany = user.accountType === 'COMPANY';
 
-  const posts = [
-    { 
-      id: "1", // blogid as 1
-      title: "L'art du packaging éco-responsable", 
-      etat: "new", 
-      date: "MAR 2026",
-      image: "/images/blog1.png"
-    },
-    { 
-      id: "2", // blogid as 2
-      title: "Logistique : Le secret des leaders", 
-      etat: "used", 
-      date: "FEB 2026",
-      image: "/images/blog2.jpg"
-    },
-    { 
-      id: "3", // blogid as 3
-      title: "Design minimaliste, impact maximal", 
-      etat: "used", 
-      date: "JAN 2026",
-      image: "/images/blog3.jpg"
-    },
-    { 
-      id: "4", // blogid as 1
-      title: "L'art du packaging éco-responsable", 
-      etat: "new", 
-      date: "MAR 2026",
-      image: "/images/blog1.png"
-    },
-    { 
-      id: "5", // blogid as 2
-      title: "Logistique : Le secret des leaders", 
-      etat: "used", 
-      date: "FEB 2026",
-      image: "/images/blog2.jpg"
-    },
-    { 
-      id: "6", // blogid as 3
-      title: "Design minimaliste, impact maximal", 
-      etat: "used", 
-      date: "JAN 2026",
-      image: "/images/blog3.jpg"
-    },
-  ];
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('/api/v1/blog/');
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        setPosts(data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des articles:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FBFBFB]">
+        <Loader2 className="animate-spin text-[#A3E635]" size={48} />
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#FBFBFB] selection:bg-[#A3E635]">
@@ -80,10 +82,10 @@ const BlogPage = ({ user = { accountType: 'INDIVIDUAL' } }) => {
                 index % 3 === 0 ? "md:col-span-8" : "md:col-span-4"
               }`}
             >
-              {/* STYLIZED INDEX INDICATOR (.1, .2, .3) */}
+              {/* STYLIZED INDEX INDICATOR */}
               <div className="absolute -top-12 -left-4 z-0 pointer-events-none">
                 <span className="text-[10rem] font-black text-black/[0.03] leading-none select-none group-hover:text-[#A3E635]/10 transition-colors duration-700">
-                  .{post.id}
+                  .{index + 1}
                 </span>
               </div>
 
@@ -100,7 +102,7 @@ const BlogPage = ({ user = { accountType: 'INDIVIDUAL' } }) => {
                 </div>
 
                 <img 
-                  src={post.image} 
+                  src={post.image || "/placeholder-blog.png"} 
                   alt={post.title}
                   className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out"
                 />
@@ -111,10 +113,10 @@ const BlogPage = ({ user = { accountType: 'INDIVIDUAL' } }) => {
               {/* Text Meta */}
               <div className="mt-8 relative z-10 flex flex-col gap-4">
                 <div className="flex justify-between items-center text-[10px] font-bold tracking-[0.2em] text-black/40 uppercase">
-                  <span>{post.date}</span>
-                  {/* Small Inline Indicator */}
+                  {/* Utilisation directe de post.date car c'est une String "MAR 2026" */}
+                  <span>{post.date} • {post.readTime}</span>
                   <span className="group-hover:text-[#A3E635] transition-colors font-black uppercase tracking-widest italic">
-                    Case Study No.{post.id}
+                    Read Story
                   </span>
                 </div>
                 
@@ -133,8 +135,6 @@ const BlogPage = ({ user = { accountType: 'INDIVIDUAL' } }) => {
           ))}
         </div>
       </section>
-
-      
     </main>
   );
 };

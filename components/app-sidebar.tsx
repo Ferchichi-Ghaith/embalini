@@ -43,22 +43,22 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/administration/dashboard",
       icon: IconDashboard,
     },
     {
-      title: "Produit",
-      url: "#",
+      title: "Gestion Produit",
+      url: "/administration/gestion_produit",
       icon: IconListDetails,
     },
     {
       title: "Blog",
-      url: "#",
+      url: "/administration/gestion_blog",
       icon: IconChartBar,
     },
     {
       title: "Command",
-      url: "#",
+      url: "/administration/gestion_commands",
       icon: IconFolder,
     },
    

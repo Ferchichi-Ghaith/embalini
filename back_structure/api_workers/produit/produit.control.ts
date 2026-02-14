@@ -41,10 +41,8 @@ export const produitController = new Elysia({ prefix: "/produit" })
   }, {
     body: t.Object({
       title: t.String(),
-      subtitle: t.Optional(t.String()),
       price: t.Number(),
       image: t.String(),
-      etat: t.String(),
       description: t.String(),
       specs: t.Any()
     })
@@ -66,10 +64,8 @@ export const produitController = new Elysia({ prefix: "/produit" })
   }, {
     body: t.Object({
       title: t.Optional(t.String()),
-      subtitle: t.Optional(t.String()),
       price: t.Optional(t.Number()),
       image: t.Optional(t.String()),
-      etat: t.Optional(t.String()),
       description: t.Optional(t.String()),
       specs: t.Optional(t.Any())
     })

@@ -27,10 +27,6 @@ export const BlogsController = new Elysia({
   }, {
     body: t.Object({
       title: t.String({ minLength: 3 }),
-      etat: t.Union([t.Literal('new'), t.Literal('used')], { 
-        default: 'new',
-        description: "Must be 'new' or 'used'" 
-      }),
       date: t.String({ example: "MAR 2026" }),
       readTime: t.String(),
       image: t.String(),
@@ -70,7 +66,6 @@ export const BlogsController = new Elysia({
   }, {
     body: t.Object({
       title: t.Optional(t.String()),
-      etat: t.Optional(t.String()),
       date: t.Optional(t.String()), // e.g., "MAR 2026"
       readTime: t.Optional(t.String()),
       image: t.Optional(t.String()),

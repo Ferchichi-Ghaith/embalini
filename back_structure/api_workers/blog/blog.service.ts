@@ -5,7 +5,6 @@ export const BlogServices = {
 // Create a new post
 create: async (data: { 
   title: string; 
-  etat: string; // "new" or "used"
   date: string; // e.g., "MAR 2026"
   readTime: string; 
   image: string; 
@@ -14,8 +13,7 @@ create: async (data: {
   return await prisma.blogPost.create({
     data: {
       ...data,
-      // Ensure etat is lowercase if your logic depends on it
-      etat: data.etat.toLowerCase(), 
+     
     }
   });
 },

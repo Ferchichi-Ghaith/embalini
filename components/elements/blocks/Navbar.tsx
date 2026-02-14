@@ -156,7 +156,7 @@ export function Navbar() {
     if (cartItems.length === 0) return;
 
     const cartData = btoa(JSON.stringify(cartItems));
-    window.location.href = `/validecommand?data=${cartData}`;
+    window.location.href = `/validecommand`;
   }}
   className={cn(
     "w-full font-black uppercase tracking-widest transition-all py-7 rounded-2xl",

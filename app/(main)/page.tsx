@@ -1,65 +1,44 @@
 "use client";
 
-import {CTA} from '@/components/elements/blocks/CTA';
-import Footer from '@/components/elements/blocks/Footer';
+import { useEffect, useState } from 'react';
+import { CTA } from '@/components/elements/blocks/CTA';
 import EmbaliniHero from '@/components/elements/blocks/Hero';
 import ProductCard from '@/components/elements/utils/productcard';
 import { motion } from 'framer-motion';
 
-const products = [
-  {
-    id: "1",
-    title: "Coffret Signature",
-    price: "45.00 TND",
-    image: "/images/p1.jpg",
-    etat: "Premium"
-  },
-  {
-    id: "2",
-    title: "Étui Minimaliste",
-    price: "29.00 TND",
-    image: "/images/p2.png",
-    etat: "Stock Limité"
-  },
-  {
-    id: "3",
-    title: "Enveloppe Kraft Luxe",
-    price: "12.00 TND",
-    image: "/images/p3.png",
-    etat: "Eco-Conçu"
-  },
-  {
-    id: "4",
-    title: "Coffret Signature",
-    price: "45.00 TND",
-    image: "/images/p1.jpg",
-    etat: "Premium"
-  },
-  {
-    id: "5",
-    title: "Étui Minimaliste",
-    price: "29.00 TND",
-    image: "/images/p2.png",
-    etat: "Stock Limité"
-  },
-  {
-    id: "6",
-    title: "Enveloppe Kraft Luxe",
-    price: "12.00 TND",
-    image: "/images/p3.png",
-    etat: "Eco-Conçu"
-  }
-];
+// Définition de l'interface basée sur votre API
+interface Product {
+  id: string;
+  title: string;
+  price: string;
+  image: string;
+  etat: string; // Utilisation de votre champ "etat"
+}
 
 const Page = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/v1/produit/');
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des produits:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
-    // Suppression de h-screen pour laisser le contenu défiler naturellement
     <main className="min-h-screen bg-[#FBFBFB]">
-      
-      {/* 1. Hero Section */}
       <EmbaliniHero />
       
-      {/* 2. Products Section avec Titre de Transition */}
       <section className="container mx-auto py-24 px-6">
         <div className="mb-20 space-y-4">
           <motion.div 
@@ -84,21 +63,23 @@ const Page = () => {
           </motion.h2>
         </div>
 
-        {/* Grille Staggered : décalage visuel pour le look "Design" */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
-          {products.map((product, index) => (
-            <div 
-              key={product.id}
-              // Décale une carte sur deux sur desktop
-            >
-              <ProductCard {...product} />
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <p className="animate-pulse text-black/50 uppercase tracking-widest">Chargement du catalogue...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+            {products.map((product) => (
+              <div key={product.id}>
+                {/* On passe les props directement, ProductCard utilisera 'etat' */}
+                <ProductCard {...product} />
+              </div>
+            ))}
+          </div>
+        )}
       </section>
-      <CTA/>
-   
-     
+      
+      <CTA />
     </main>
   );
 };
