@@ -26,7 +26,7 @@ const CategorySection = () => {
             </div>
             <h2 className="text-[#0D2C30] text-6xl md:text-8xl font-extralight tracking-tighter leading-[0.8] uppercase">
               Nos <span className="font-serif italic text-[#94C973] lowercase">solutions</span> <br /> 
-              <span className="opacity-85">sur-mesure.</span>
+              <span className="opacity-15">sur-mesure.</span>
             </h2>
           </div>
           

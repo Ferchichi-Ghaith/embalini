@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { CTA } from '@/components/elements/blocks/CTA';
 import EmbaliniHero from '@/components/elements/blocks/Hero';
-import ProductCard from '@/components/elements/utils/productcard';
-import { motion } from 'framer-motion';
 import CategorySection from '@/components/elements/blocks/Category';
+import { ProcessSection } from '@/components/elements/blocks/procces';
 
 // Définition de l'interface basée sur votre API
 interface Product {
@@ -39,10 +37,9 @@ const Page = () => {
   return (
     <main className="min-h-screen bg-[#FBFBFB]">
       <EmbaliniHero />
-      
       <CategorySection/>
+      <ProcessSection/>
       
-      <CTA />
     </main>
   );
 };
