@@ -1,88 +1,70 @@
+import { ArrowRight, ChevronDown, MousePointer2 } from "lucide-react";
 
-import { ArrowRight,  } from "lucide-react";
+interface Props {
+  user?: { accountType: "COMPANY" | "INDIVIDUAL" };
+}
 
-
-
-const EmbaliniHero = () => {
-
+const EmbaliniHero = ({ user }: Props) => {
+  const isCompany = user?.accountType === "COMPANY";
 
   return (
-    <section 
-      className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden   selection:bg-[#A3E635] selection:text-black"
-    >
-      {/* Background Image Container */}
-      <div 
-        className="absolute inset-0 z-0"
-      >
-        <div className="absolute inset-0 bg-linear-to-b from-[#FBFBFB]/80 via-transparent to-[#FBFBFB] z-10" />
+    <section className="relative w-full min-h-screen flex flex-col items-center justify-center  overflow-hidden selection:bg-[#94C973] selection:text-white">
+      
+      {/* BACKGROUND: Award-winning Texture & Depth */}
+      <div className="absolute inset-0 z-0">
+        {/* Soft Branding Gradient */}
+        <div className="absolute inset-0  z-10" />
         <img 
-          src="https://img.freepik.com/free-vector/vector-abstract-green-background-template_474888-2577.jpg" 
-          alt="Embalini Premium Packaging"
-          className="w-full h-full object-cover  "
+          src="https://img.freepik.com/premium-photo/moving-boxes-plants-new-home-office_1410957-66012.jpg" 
+          alt="Texture"
+          className="w-full h-full object-cover opacity-90  mix-blend-multiply"
         />
+        {/* Persistent Film Grain (Awwwards 2026 Staple) */}
+        <div className="absolute inset-0 z-20 pointer-events-none opacity-[0.04] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       </div>
 
-      {/* Grain Texture */}
-      <div className="absolute inset-0 z-20 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      {/* CONTENT */}
+      <div className="relative z-30 flex flex-col items-center w-full max-w-[1440px] px-6">
+       
 
-      <div 
-        
-        
-        className="relative z-30 flex flex-col items-center px-6 text-center max-w-7xl"
-      >
-        
-        {/* Business Badge */}
-        <div  className="mb-6 group mt-5">
-          <div className="px-5 py-2 rounded-full border border-black/5 bg-white/40 backdrop-blur-xl shadow-sm flex items-center gap-3">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3E635] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#A3E635]"></span>
+        {/* Headline: Staggered Editorial Style */}
+        <div className="text-center mb-16">
+          <h1 className="flex flex-col items-center">
+            <span className="text-[17vw] md:text-[13rem] font-extralight leading-[0.75] tracking-[-0.06em] text-[#0D2C30] uppercase">
+              Emba<span className="font-serif italic text-[#94C973] lowercase">l</span>ini
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-black/60 flex items-center gap-2">
-              Standard de Qualité 2026
-            </span>
-          </div>
-        </div>
-
-        {/* Headline Section */}
-        <div className="relative">
-          <h1 
-           
-            className="text-[15vw] md:text-[11rem] font-[1000] leading-[0.75] tracking-[-0.07em] uppercase text-black italic drop-shadow-sm"
-          >
-            Embalini<span className="text-[#A3E635] not-italic ml-2">.</span>
+            <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 opacity-80">
+               <span className="text-xl md:text-4xl font-serif text-[#0D2C30] tracking-tighter uppercase">L'Art de la</span>
+               <span className="text-xl md:text-4xl font-serif italic text-[#f5f5f5] tracking-tight">Protection</span>
+               <span className="text-xl md:text-4xl font-serif text-[#0D2C30]  tracking-tighter uppercase">Prestigieuse</span>
+            </div>
           </h1>
-          
-          <div className="mt-8 overflow-hidden">
-            <h2 className="text-[5vw] md:text-[3rem] font-light tracking-tighter text-black/60 uppercase italic">
-              L'excellence par la <span className="font-bold text-black not-italic relative inline-block">
-                Protection
-                <span 
-                   
-                  
-               
-                   className="absolute -bottom-2 left-0 h-[3px] bg-[#A3E635]"
-                />
-              </span>
-            </h2>
-          </div>
         </div>
 
-        <p 
-          className="mt-12 max-w-2xl text-lg md:text-xl text-black/70 font-medium leading-relaxed drop-shadow-sm"
-        >
-          Transformez votre logistique en une signature de marque prestigieuse. 
-          Le futur de l'emballage est arrivé.
-        </p>
-
-        <div  className="mt-12 flex flex-col sm:flex-row gap-6">
-            <button className="px-10 py-5 bg-black text-[#A3E635] rounded-full font-bold uppercase text-[11px] tracking-widest flex items-center gap-4 hover:scale-105 transition-transform">
-                Démarrer un Projet <ArrowRight size={18} />
-            </button>
+        {/* Bento Interaction Group */}
+        <div className="flex flex-col md:flex-row items-stretch gap-px bg-[#0D2C30]/10 border border-[#0D2C30]/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl">
+          <button className="px-14 py-10 bg-[#0D2C30] text-white flex flex-col items-start gap-5 transition-all hover:bg-[#143d42] group min-w-[320px]">
+             <span className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-50">
+                {isCompany ? "Solutions Pro" : "Clientèle Privée"}
+             </span>
+             <span className="text-2xl font-light flex items-center justify-between w-full">
+                {isCompany ? "Devis Sur-Mesure" : "Explorer l'Eshop"}
+                <ArrowRight className="group-hover:translate-x-3 transition-transform text-[#94C973]" />
+             </span>
+          </button>
+          
+          <button className="px-14 py-10 bg-white/60 text-[#0D2C30] flex flex-col items-start gap-5 transition-all hover:bg-white group min-w-[320px]">
+             <span className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-50">Catalogue</span>
+             <span className="text-2xl font-light flex items-center justify-between w-full">
+                Saison 2026
+                <MousePointer2 size={20} className="opacity-20 group-hover:opacity-100 group-hover:rotate-12 transition-all text-[#94C973]" />
+             </span>
+          </button>
         </div>
       </div>
 
-   
+     
+
     </section>
   );
 };

@@ -1,8 +1,7 @@
 "use client";
 
-import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, MessageSquare } from "lucide-react";
+import { ArrowRight, Star, Quote } from "lucide-react";
 
 interface CTAProps {
   userAccountType?: "COMPANY" | "INDIVIDUAL";
@@ -10,101 +9,126 @@ interface CTAProps {
 
 const TESTIMONIALS = [
   {
-    quote: "Nous tenions à vous remercier pour la qualité de vos sacs en carton. Votre travail répond parfaitement à nos attentes.",
+    quote: "Qualité exceptionnelle pour nos sacs en carton. Répond parfaitement aux exigences du luxe.",
     name: "LINEN COLOR",
-    designation: "Eco-luxe pour la maison et les accessoires",
-    src: "https://scontent.ftun20-1.fna.fbcdn.net/v/t39.30808-6/378317434_7416568875024294_5434878253437673382_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=XSmzMaoC5EcQ7kNvwHRBvIj&_nc_oc=AdliRDCwI0lvorQVpBkP4yYVFZVTHrsqrFt_WaSqlCtIweMTXaI7XXWO0zzt57Bwk9EHCwgIOn6MIT3yVn2CnV2a&_nc_zt=23&_nc_ht=scontent.ftun20-1.fna&_nc_gid=8_TztYoTPpEv0Nop2Z9sLA&oh=00_AfttE9q5K015mkjfx_nbeU02hWgZEg5t6oZL6ESXop1Uwg&oe=699249AC",
+    role: "Partenaire Eco-Luxe"
   },
   {
-    quote: "Merci Embalini pour l'emballage écologique et personnalisé je commande chaleureusement leur solution bonne continuation.",
+    quote: "Une solution écologique personnalisée que je recommande sans hésiter.",
     name: "Faten Oueslati",
-    designation: "Création digitale",
-    src: "https://scontent.ftun20-1.fna.fbcdn.net/v/t39.30808-1/318330033_6494092897274697_7760795668453072097_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=104&ccb=1-7&_nc_sid=1d2534&_nc_ohc=RfxMcYdeNpgQ7kNvwEcxM73&_nc_oc=Adkxv-IvrgFBwoUGlkeHcLqItCLwscugsFpXc1DjD2ie-fQ8HPDH0KPURFQevZDGecNaETqAXseFiL1urN6mr9PW&_nc_zt=24&_nc_ht=scontent.ftun20-1.fna&_nc_gid=oBaILdM0p-eGI62Y_byIrA&oh=00_AfvALVeqWA_5G9R8cXaEeYwFrRSyPXX8gHTvC2-Qn-VM-w&oe=69923E28",
+    role: "Digital Curator"
   },
   {
-    quote: "Une excellente solution d'emballage, merci pour cette initiative écologique 🫶🏼 bonne continuation ❤️",
+    quote: "L'initiative durable qu'il manquait au marché. Bravo pour la finition.",
     name: "Soulaïma Omrani",
-    designation: "Afawih Epicerie CEO/Co-Founder",
-    src: "https://scontent-pmo1-1.xx.fbcdn.net/v/t39.30808-6/506295625_24485317337771432_6182384594260088899_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=6HyYYsuK-sQQ7kNvwHTewiE&_nc_oc=Adldm4VeWSAB1w3LnltEeHVbCf0duuDEq8MXJHNuUgqxvBzfN7FAWLkcEoSpqLCxaoc&_nc_zt=23&_nc_ht=scontent-pmo1-1.xx&_nc_gid=skZzNlfCqP5e5qThp3dsxw&oh=00_AftVZkl9zq8cl_6o-K3PHhOq78dcTTQ9tyU3lANiWWdPtw&oe=69923A5E",
-  },
+    role: "CEO Afawih"
+  }
 ];
-
-const FEATURES = [
-  "Livraison Rapide ",
-  "Matériaux Éco-responsables",
-  "Solutions Personnalisées",
-];
-
 
 export function CTA({ userAccountType = "INDIVIDUAL" }: CTAProps) {
-  const isCompany = userAccountType === "INDIVIDUAL";
+  const isCompany = userAccountType === "COMPANY";
 
-  // Personnalisation du texte selon le type de compte
   const content = {
-    title: isCompany ? "VALORISEZ" : "DONNEZ DE LA",
-    highlight: isCompany ? "VOTRE MARQUE" : "VALEUR",
+    title: isCompany ? "INGÉNIERIE" : "L'ART DE",
+    highlight: isCompany ? "DU PACKAGING" : "L'EMBALLAGE",
     description: isCompany 
-      ? "Solutions B2B sur-mesure pour vos packagings industriels et commerciaux. Optimisez vos coûts et votre image."
-      : "Expertise en emballage sur-mesure pour booster votre image de marque et sécuriser vos expéditions.",
-    cta: isCompany ? "Demander un devis" : "Commencer mon projet"
+      ? "Optimisez votre chaîne logistique avec nos solutions biosourcées haute performance."
+      : "Sublimez l'expérience déballage de vos clients avec nos matériaux d'exception.",
+    cta: isCompany ? "Demander une étude B2B" : "Voir les collections"
   };
 
   return (
-    <section className="relative py-10 px-6 overflow-hidden bg-background">
-      {/* Background Image Container */}
-   
-
-      <div className="container mx-auto max-w-7xl relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+    <section className="relative py-32 px-6 bg-[#F9F9F7] overflow-hidden">
+      {/* Texture Grain Subtile */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      
+      <div className="container mx-auto max-w-7xl relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
           
-          {/* Left Side: Content */}
+          {/* GAUCHE : CONTENU ÉDITORIAL */}
           <motion.div 
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col space-y-8"
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-6 space-y-12"
           >
-         
-            
-            <div className="space-y-4">
-              <h2 className="text-4xl md:text-6xl font-black leading-[1.1] tracking-tight text-foreground">
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-px bg-[#94C973]" />
+                {/* Texte plus foncé pour la lisibilité */}
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#0D2C30]/70">
+                  Prêt pour expédition
+                </span>
+              </div>
+              
+              <h2 className="text-7xl md:text-9xl font-extralight leading-[0.85] tracking-tighter text-[#0D2C30] uppercase">
                 {content.title} <br />
-                <span className="italic underline decoration-primary/30 text-[#A3E635] underline-offset-8">
+                <span className="font-serif italic text-[#94C973] lowercase text-7xl md:text-9xl">
                   {content.highlight}
                 </span>
               </h2>
-              <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
+              
+              {/* Description avec contraste renforcé (opacity 80 au lieu de 50) */}
+              <p className="text-xl text-[#0D2C30]/80 max-w-md font-normal leading-relaxed">
                 {content.description}
               </p>
             </div>
 
-          
-
-            {/* CTA Actions */}
-            <div className="flex flex-wrap gap-4 pt-4">
-              <button className="flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-105 transition-all shadow-lg shadow-primary/25">
-                {content.cta}
-                <ArrowRight className="w-4 h-4" />
+            <div className="flex flex-col sm:flex-row items-center lg:items-start gap-8">
+              <button className="group relative flex items-center gap-10 px-10 py-6 bg-[#0D2C30] text-white rounded-full transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <span className="relative z-10 text-[11px] font-bold uppercase tracking-[0.2em]">{content.cta}</span>
+                <ArrowRight className="w-5 h-5 text-[#94C973] group-hover:translate-x-2 transition-transform" />
               </button>
-              
-            
+
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((s) => <Star key={s} size={12} className="fill-[#94C973] text-[#94C973]" />)}
+                </div>
+                <span className="text-[10px] font-bold text-[#0D2C30] uppercase tracking-widest opacity-60">
+                  Satisfaction certifiée
+                </span>
+              </div>
             </div>
           </motion.div>
 
-          {/* Right Side: Testimonials */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            className="relative"
-          >
-            <div className="absolute -inset-4 rounded-[3rem]  -z-10 hidden sm:block" />
-            <div className="relative">
-               <AnimatedTestimonials testimonials={TESTIMONIALS} />
-            </div>
-          </motion.div>
+          {/* DROITE : TÉMOIGNAGES TEXTUELS (LISIBILITÉ MAXIMALE) */}
+          <div className="lg:col-span-6 grid grid-cols-1 gap-6">
+            {TESTIMONIALS.map((t, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1, duration: 0.8 }}
+                className="group p-10 bg-white border border-[#0D2C30]/5 rounded-xl shadow-[0_4px_20px_rgba(13,44,48,0.02)] hover:shadow-[0_20px_40px_rgba(13,44,48,0.05)] transition-all duration-500"
+              >
+                <div className="flex items-start justify-between mb-6">
+                  <Quote className="text-[#94C973] opacity-40 group-hover:opacity-100 transition-opacity" size={24} />
+                  <div className="h-px w-12 bg-[#0D2C30]/10 mt-3" />
+                </div>
+
+                <p className="text-xl text-[#0D2C30] font-medium leading-tight mb-8 tracking-tight italic">
+                  "{t.quote}"
+                </p>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col">
+                    <h4 className="text-[11px] font-black uppercase tracking-widest text-[#0D2C30]">
+                      {t.name}
+                    </h4>
+                    <p className="text-[10px] text-[#94C973] font-bold uppercase tracking-tighter">
+                      {t.role}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
         </div>
       </div>
+
+      {/* Accents visuels Sage Green */}
+      <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[#94C973]/10 rounded-full blur-[100px] pointer-events-none" />
     </section>
   );
 }

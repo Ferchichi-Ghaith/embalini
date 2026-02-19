@@ -66,9 +66,7 @@ export function Navbar() {
         
         {/* LOGO */}
         <Link href="/" className="z-50 group">
-          <h1 className="text-2xl md:text-3xl font-[1000] tracking-tighter uppercase italic transition-transform group-hover:scale-105">
-            Embalini<span className={cn("text-[#A3E635] ml-1", isScrolled ? "text-white" : "")}>.</span>
-          </h1>
+          <img src="/images/logo.svg" alt="" className="w-40 h-36"/>
         </Link>
 
         {/* DESKTOP NAV */}
