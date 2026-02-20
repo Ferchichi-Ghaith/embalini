@@ -137,7 +137,7 @@ const ShowcasePage = () => {
         <div className="flex flex-col lg:flex-row gap-12">
           
           {/* NAVIGATION LATÉRALE */}
-          <aside className="w-full lg:w-80 flex-shrink-0 lg:sticky lg:top-40 h-fit z-30">
+          <aside className="w-full lg:w-80 shrink-0 lg:sticky lg:top-40 h-fit z-30">
             <nav className="flex lg:flex-col gap-2 overflow-x-auto no-scrollbar pb-4 lg:pb-0 snap-x">
               <button
                 onClick={() => setActiveCategory("all")}
@@ -175,7 +175,7 @@ const ShowcasePage = () => {
           <div className="flex-grow">
             <motion.div 
               layout
-              className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-10"
+              className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-10"
             >
               <AnimatePresence mode="popLayout">
                 {filteredProducts.map((product, index) => (
@@ -196,7 +196,6 @@ const ShowcasePage = () => {
                       title={product.title}
                       price={product.price}
                       image={product.image}
-                      badge={product.etat} 
                       category={product.category?.title}
                     />
                   </motion.div>
