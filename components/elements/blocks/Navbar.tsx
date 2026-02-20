@@ -60,33 +60,36 @@ export function Navbar() {
   return (
     <header className={cn(
       "fixed top-0 z-50 w-full transition-all duration-300 border-b",
-      isScrolled ? "h-14 bg-[#A3E635] text-white backdrop-blur-xl border-black/5" : "h-20 bg-transparent border-transparent"
+      /* 1. Changement du vert fluo/foncé par un gris très clair (#F9FAFB) ou blanc */
+      isScrolled ? "h-16 bg-[#F9FAFB] text-black shadow-sm border-gray-200" : "h-20 bg-transparent border-transparent"
     )}>
       <div className="container mx-auto flex h-full items-center justify-between px-6">
         
-        {/* LOGO */}
-        <Link href="/" className="z-50 group">
-          <img src="/images/logo.svg" alt="" className="w-40 h-36"/>
+        {/* 2 & 3. LOGO (Contenant la plante) - Taille ajustée pour ne pas être trop massif */}
+        <Link href="/" className="z-50 group flex items-center">
+          <img 
+            src="/images/logo.svg" 
+            alt="Embalini Logo" 
+            className="w-32 h-auto object-contain" /* Ajusté pour une meilleure intégration */
+          />
         </Link>
 
         {/* DESKTOP NAV */}
         <nav className="hidden md:flex items-center gap-10">
           {navigationItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <TextRoll className="text-[11px] font-bold uppercase tracking-[0.2em]">
+              <TextRoll className="text-[11px] font-bold uppercase tracking-[0.2em] text-black">
                 {item.name}
               </TextRoll>
             </Link>
           ))}
-          
         </nav>
 
         <div className="flex items-center gap-4">
           
-          {/* DRAWER DU PANIER */}
           <Drawer>
             <DrawerTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative text-black">
                 <ShoppingCart className="h-6 w-6" />
                 {cartItems.length > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">
@@ -145,14 +148,13 @@ export function Navbar() {
                     disabled={cartItems.length === 0}
                     onClick={() => {
                       if (cartItems.length === 0) return;
-                      // Encodage base64 pour passer les données (optionnel selon votre logique /validecommand)
-                      // const cartData = btoa(JSON.stringify(cartItems));
                       window.location.href = `/validecommand`;
                     }}
                     className={cn(
                       "w-full font-black uppercase tracking-widest transition-all py-7 rounded-2xl",
+                      /* Remplacement du bouton vert fluo par un noir élégant ou gris charte */
                       cartItems.length > 0 
-                        ? "bg-[#A3E635] text-black hover:bg-black hover:text-[#A3E635] cursor-pointer" 
+                        ? "bg-black text-white hover:bg-gray-800 cursor-pointer" 
                         : "bg-gray-100 text-gray-400 cursor-not-allowed opacity-70"
                     )}
                   >
@@ -164,22 +166,12 @@ export function Navbar() {
                       <Link href="/products" className="w-full">
                         <Button 
                           variant="ghost" 
-                          className="w-full text-[10px] uppercase font-bold tracking-widest opacity-50 hover:opacity-100 transition-opacity"
+                          className="w-full text-[10px] uppercase font-bold tracking-widest opacity-50 hover:opacity-100 transition-opacity text-black"
                         >
                           Continuer mes achats
                         </Button>
                       </Link>
                     </DrawerClose>
-
-                    <Link href="/check-command" className="w-full">
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-dashed border-black/20 text-[10px] uppercase font-bold tracking-widest hover:bg-gray-50 transition-all py-5 rounded-xl flex gap-2"
-                      >
-                        <ClipboardList size={14} />
-                        Suivre ma commande
-                      </Button>
-                    </Link>
                   </div>
                 </DrawerFooter>
               </div>
@@ -190,28 +182,26 @@ export function Navbar() {
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className={cn(isScrolled ? "text-white" : "text-black")}>
+                <Button variant="ghost" size="icon" className="text-black">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-full bg-black text-white border-none flex flex-col items-center justify-center">
+              <SheetContent side="right" className="w-full bg-white text-black border-none flex flex-col items-center justify-center">
                 <DialogTitle className="sr-only">Menu de navigation</DialogTitle>
                 <ul className="space-y-8 text-center flex flex-col items-center">
                   {navigationItems.map((item) => (
                     <li key={item.name}>
                       <SheetClose asChild>
-                        <Link href={item.href} className="text-4xl font-black text-white uppercase italic hover:text-[#A3E635] transition-colors">
+                        <Link href={item.href} className="text-4xl font-black text-black uppercase italic hover:text-gray-500 transition-colors">
                           {item.name}
                         </Link>
                       </SheetClose>
                     </li>
                   ))}
-
-                  {/* BOUTON SUIVI COMMANDE MOBILE */}
                   <li className=" w-full px-10">
                     <SheetClose asChild>
                       <Link href="/check-command">
-                        <Button variant="outline" className="w-full bg-[#A3E635] cursor-pointer text-black font-black uppercase italic py-7 rounded-2xl  flex gap-3">
+                        <Button variant="outline" className="w-full bg-black text-white font-black uppercase italic py-7 rounded-2xl flex gap-3">
                           <Search size={20} />
                           Suivre ma commande
                         </Button>
@@ -228,7 +218,6 @@ export function Navbar() {
   );
 }
 
-// COMPOSANT TEXTROLL
 const TextRoll = ({ children, className }: { children: string; className?: string }) => {
   return (
     <motion.span initial="initial" whileHover="hovered" className={cn("relative block overflow-hidden", className)} aria-label={children}>

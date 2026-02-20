@@ -5,6 +5,7 @@ import { cors } from '@elysiajs/cors'
 import { produitController } from '@/back_structure/api_workers/produit/produit.control';
 import { BlogsController } from '@/back_structure/api_workers/blog/blog.control';
 import { commandController } from '@/back_structure/api_workers/command/command.control';
+import { categoryController } from '@/back_structure/api_workers/category/cat.controler';
 
 
 /**
@@ -58,6 +59,7 @@ const app = new Elysia({ prefix: '/api' })
     .use(produitController)
     .use(BlogsController)
     .use(commandController)
+    .use(categoryController)
   )
 
 console.log(`🚀 Elysia is running with Cache Disabled`);

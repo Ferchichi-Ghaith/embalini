@@ -30,7 +30,7 @@ const EmbaliniHero = ({ user }: Props) => {
         {/* Headline: Staggered Editorial Style */}
         <div className="text-center mb-16">
           <h1 className="flex flex-col items-center">
-            <span className="text-[17vw] md:text-[13rem] font-extralight leading-[0.75] tracking-[-0.06em] text-[#0D2C30] uppercase">
+            <span className="text-[17vw] md:text-[10rem] font-extralight leading-[0.75] tracking-[-0.06em] text-[#0D2C30] uppercase">
               Emba<span className="font-serif italic text-[#94C973] lowercase">l</span>ini
             </span>
             <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 opacity-80">

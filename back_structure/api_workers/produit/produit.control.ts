@@ -5,11 +5,21 @@ export const produitController = new Elysia({ prefix: "/produit" })
   // GET /produit
   .get("/", async ({ set }) => {
     try {
-      const products = await produitServices.getAll();
-      return products;
+      return await produitServices.getAll();
     } catch (e) {
       set.status = 500;
       return { error: "Failed to fetch products" };
+    }
+  })
+
+  // GET /produit/category/:categoryId
+  // Added to allow filtering by the new Category model
+  .get("/category/:categoryId", async ({ params: { categoryId }, set }) => {
+    try {
+      return await produitServices.getByCategory(categoryId);
+    } catch (e) {
+      set.status = 500;
+      return { error: "Failed to fetch products for this category" };
     }
   })
 
@@ -36,7 +46,8 @@ export const produitController = new Elysia({ prefix: "/produit" })
       return newProduct;
     } catch (e) {
       set.status = 500;
-      return { error: "Failed to create product" };
+      // Detailed error logging might be helpful here for debugging relations
+      return { error: "Failed to create product. Ensure categoryId is valid." };
     }
   }, {
     body: t.Object({
@@ -44,7 +55,9 @@ export const produitController = new Elysia({ prefix: "/produit" })
       price: t.Number(),
       image: t.String(),
       description: t.String(),
-      specs: t.Any()
+      specs: t.Any(),
+      categoryId: t.String(), // Required: Links product to Category
+      etat: t.Optional(t.String()) // Field from your API "etat"
     })
   })
 
@@ -52,10 +65,6 @@ export const produitController = new Elysia({ prefix: "/produit" })
   .patch("/:id", async ({ params: { id }, body, set }) => {
     try {
       const updatedProduct = await produitServices.update(id, body);
-      if (!updatedProduct) {
-        set.status = 404;
-        return { error: "Product not found or update failed" };
-      }
       return updatedProduct;
     } catch (e) {
       set.status = 500;
@@ -67,21 +76,19 @@ export const produitController = new Elysia({ prefix: "/produit" })
       price: t.Optional(t.Number()),
       image: t.Optional(t.String()),
       description: t.Optional(t.String()),
-      specs: t.Optional(t.Any())
+      specs: t.Optional(t.Any()),
+      categoryId: t.Optional(t.String()), // Allow moving product to a different category
+      etat: t.Optional(t.String())
     })
   })
 
   // DELETE /produit/:id
   .delete("/:id", async ({ params: { id }, set }) => {
     try {
-      const deleted = await produitServices.delete(id);
-      if (!deleted) {
-        set.status = 404;
-        return { error: "Product not found" };
-      }
+      await produitServices.delete(id);
       return { message: `Product ${id} deleted successfully` };
     } catch (e) {
-      set.status = 500;
-      return { error: "Failed to delete product" };
+      set.status = 404; // Usually fails because ID doesn't exist
+      return { error: "Product not found or already deleted" };
     }
   });

@@ -47,6 +47,11 @@ const data = {
       icon: IconDashboard,
     },
     {
+      title: "Gestion Categories",
+      url: "/administration/gestion_category",
+      icon: IconListDetails,
+    },
+    {
       title: "Gestion Produit",
       url: "/administration/gestion_produit",
       icon: IconListDetails,

@@ -17,9 +17,15 @@ enum OrderStatus {
   CANCELLED
 }
 
+
 // --- MODELS ---
 
-
+model Category {
+  id       String    @id @default(cuid())
+  title    String
+  image    String
+  products Product[] // Opposite relation field (one category -> many products)
+}
 
 model Product {
   id          String   @id @default(cuid())
@@ -29,6 +35,13 @@ model Product {
   description String   @db.Text
   specs       Json     // Array of {label, value} stored directly
   
+  // NEW: Condition field from your API
+  etat        String?  
+
+  // --- RELATION TO CATEGORY ---
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -57,6 +70,8 @@ model Commands {
   telephone        String
   message          String?     @db.Text
   date             DateTime    @default(now())
+
+
   
   // Financials
   total_estimation Decimal     @db.Decimal(10, 2)
