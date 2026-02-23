@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Plus, Minus, ArrowRight, Zap, Loader2 } from "lucide-react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { Plus, Minus, ArrowRight, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 
-// --- 1. Définition des Interfaces TypeScript ---
-
+// --- Interfaces ---
 interface ProductSpec {
   label: string;
   value: string;
@@ -15,15 +15,15 @@ interface ProductSpec {
 interface Product {
   id: string;
   title: string;
-  nom?: string; // Support pour variation de nom API
+  nom?: string; 
   subtitle: string;
   price: number;
   image: string;
   description: string;
   specs: ProductSpec[];
+  etat?: string; // Integrated from your API data
 }
 
-// 2. Type pour le contenu du panier (localStorage)
 interface CartItem {
   id: string;
   titre: string;
@@ -33,171 +33,178 @@ interface CartItem {
   productimage: string;
 }
 
-// 3. Simulé depuis vos informations utilisateur
-type AccountType = "COMPANY" | "INDIVIDUAL";
-
 const ProductPage = () => {
   const params = useParams();
-  
-  // Typage des états React
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [quantity, setQuantity] = useState<number>(1);
+  const [isAdded, setIsAdded] = useState(false);
   
   const { scrollY } = useScroll();
-  
-  // Utilisation de la logique de compte provenant de vos consignes
-  const accountType: AccountType = "COMPANY"; 
+  const yImage = useTransform(scrollY, [0, 500], [0, -80]);
 
-  // --- Fetching API ---
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        // Utilisation de params.id typé comme string
-        const response = await fetch(`/api/v1/produit/${params.id}`);
-        if (!response.ok) throw new Error("Erreur réseau");
-        
-        const data: Product = await response.json();
-        setProduct(data);
-      } catch (error) {
-        console.error("Erreur lors de la récupération du produit:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Mocking the accountType based on your instructions
+  // In a real app, this would come from an Auth Context
+  const accountType = "COMPANY"; 
 
-    if (params.id) fetchProduct();
+  const fetchProduct = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/v1/produit/${params.id}`);
+      if (!response.ok) throw new Error("Produit introuvable");
+      const data = await response.json();
+      setProduct(data);
+    } catch (error) {
+      console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [params.id]);
 
-  // Effet de Parallaxe
-  const yImage = useTransform(scrollY, [0, 500], [0, -50]);
+  useEffect(() => {
+    if (params.id) fetchProduct();
+  }, [fetchProduct]);
 
-  // --- Rendu conditionnel (Chargement) ---
+  // --- Optimized Cart Logic ---
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    const currentCart: CartItem[] = JSON.parse(localStorage.getItem("productpanierlist") || "[]");
+    
+    // Check if item already exists to update quantity instead of duplicating
+    const existingItemIndex = currentCart.findIndex(item => item.id === product.id);
+    
+    if (existingItemIndex > -1) {
+      currentCart[existingItemIndex].quantite += quantity;
+      currentCart[existingItemIndex].prix_total = 
+        (currentCart[existingItemIndex].quantite * product.price).toFixed(2);
+    } else {
+      currentCart.push({
+        id: product.id,
+        titre: product.title || product.nom || "Produit",
+        quantite: quantity,
+        prix_unitaire: product.price,
+        prix_total: (product.price * quantity).toFixed(2),
+        productimage: product.image,
+      });
+    }
+
+    localStorage.setItem("productpanierlist", JSON.stringify(currentCart));
+    window.dispatchEvent(new Event("cartUpdate"));
+    
+    // Feedback UI
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FBFBFB]">
-        <Loader2 className="animate-spin text-[#A3E635]" size={48} />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FBFBFB] gap-4">
+        <Loader2 className="animate-spin text-[#94C973]" size={40} />
+        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Chargement Embalini...</p>
       </div>
     );
   }
 
-  if (!product) return <div className="text-center pt-40">Produit non trouvé.</div>;
-
-  // --- Gestion du Panier (avec typage) ---
-  const handleAddToCart = () => {
-    const nouveauProduit: CartItem = {
-      id: product.id,
-      titre: product.title || product.nom || "Produit",
-      quantite: quantity,
-      prix_unitaire: product.price,
-      prix_total: (product.price * quantity).toFixed(2),
-      productimage: product.image,
-    };
-
-    const panierExistant: CartItem[] = JSON.parse(localStorage.getItem("productpanierlist") || "[]");
-    const nouveauPanier = [...panierExistant, nouveauProduit];
-    localStorage.setItem("productpanierlist", JSON.stringify(nouveauPanier));
-
-    window.dispatchEvent(new Event("cartUpdate"));
-    console.log("Panier mis à jour !",nouveauPanier);
-  };
+  if (!product) return <div className="text-center pt-40 font-serif italic text-2xl">Produit non trouvé.</div>;
 
   return (
-    <div className="min-h-screen bg-[#FBFBFB] text-[#1A1A1A] selection:bg-[#A3E635]">
+    <div className="min-h-screen bg-[#FBFBFB] text-[#0D2C30] selection:bg-[#94C973] selection:text-white">
       
-      <main className="pt-32 pb-20 px-6 md:px-12 max-w-[1800px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
+      <main className="pt-32 pb-20 px-6 md:px-12 max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 xl:gap-32 items-start">
           
-          {/* SCÈNE VISUELLE */}
+          {/* LEFT: VISUALS */}
           <section className="relative lg:sticky lg:top-32">
             <motion.div 
               style={{ y: yImage }}
-              className="relative aspect-square bg-[#A3E635] rounded-[40px] overflow-hidden flex items-center justify-center group"
+              className="relative aspect-square bg-zinc-100 rounded-[48px] overflow-hidden flex items-center justify-center border border-black/5"
             >
+              {/* ETAT BADGE */}
+              {product.etat && (
+                <div className="absolute top-8 left-8 z-10 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-black/5 shadow-sm">
+                  <span className="text-[9px] font-black uppercase tracking-tighter">{product.etat}</span>
+                </div>
+              )}
+
               <motion.img 
-                initial={{ scale: 1.2, opacity: 0 }}
+                initial={{ scale: 1.1, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.8 }}
                 src={product.image} 
-                className="w-3/4 h-3/4 object-contain drop-shadow-[0_35px_35px_rgba(0,0,0,0.25)] scale-110 rounded-2xl"
+                className="w-4/5 h-4/5 object-contain drop-shadow-2xl"
                 alt={product.title}
               />
-              
-             
             </motion.div>
           </section>
 
-          {/* ARCHITECTURE DE L'INFORMATION */}
-          <section className="space-y-16">
+          {/* RIGHT: CONTENT */}
+          <section className="flex flex-col gap-12">
             
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <span className="h-px w-12 bg-black/20" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-black/40">
-                  {product.subtitle}
-                </span>
+              <div className="flex items-center gap-2 text-[#94C973]">
+                <Zap size={14} fill="currentColor" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.3em]">{product.subtitle}</span>
               </div>
-              <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter leading-[0.85] italic">
-                {product.title}<span className="text-[#A3E635]">.</span>
+              <h1 className="text-5xl md:text-7xl font-light tracking-tighter uppercase leading-[0.9]">
+                {product.title}<span className="text-[#94C973]">.</span>
               </h1>
             </div>
 
-            {/* Carte de Prix adaptée B2B/B2C */}
-            <div className="p-8 rounded-[32px] bg-white border border-black/5 shadow-2xl shadow-black/2 flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
-               <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-black/40 mb-1">
-                    {accountType === "COMPANY" ? "Tarif Exclusif B2B" : "Prix de Vente"}
-                  </p>
-                  <h2 className="text-5xl font-light">
-                    {(product.price * quantity).toFixed(2)}<span className="text-xl ml-1">TND</span>
-                  </h2>
+            {/* PRICE CARD */}
+            <div className="p-10 rounded-[40px] bg-white border border-black/5 shadow-sm space-y-8">
+               <div className="flex justify-between items-end">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
+                      {accountType === "COMPANY" ? "Tarif Pro (HT)" : "Prix Public TTC"}
+                    </p>
+                    <h2 className="text-6xl font-light tracking-tighter">
+                      {(product.price * quantity).toLocaleString()}
+                      <span className="text-2xl ml-2 font-medium">TND</span>
+                    </h2>
+                  </div>
+                  
+                  {/* QUANTITY PICKER */}
+                  <div className="flex items-center bg-zinc-50 rounded-2xl p-1.5 border border-zinc-100">
+                    <button onClick={() => setQuantity(q => Math.max(1, q-1))} className="p-3 hover:bg-white hover:shadow-sm rounded-xl transition-all"><Minus size={16}/></button>
+                    <span className="w-10 text-center font-bold">{quantity}</span>
+                    <button onClick={() => setQuantity(q => q+1)} className="p-3 hover:bg-white hover:shadow-sm rounded-xl transition-all"><Plus size={16}/></button>
+                  </div>
                </div>
-               <div className="flex items-center bg-[#F4F4F4] rounded-2xl p-2 border border-black/5">
-                  <button 
-                    onClick={() => setQuantity(q => Math.max(1, q-1))} 
-                    className="p-4 hover:bg-white rounded-xl transition-all"
-                  >
-                    <Minus size={16}/>
-                  </button>
-                  <span className="w-12 text-center font-black text-xl">{quantity}</span>
-                  <button 
-                    onClick={() => setQuantity(q => q+1)} 
-                    className="p-4 hover:bg-white rounded-xl transition-all"
-                  >
-                    <Plus size={16}/>
-                  </button>
-               </div>
+
+               <button 
+                  onClick={handleAddToCart}
+                  disabled={isAdded}
+                  className={cn(
+                    "w-full py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] transition-all duration-500 flex items-center justify-center gap-3",
+                    isAdded ? "bg-zinc-100 text-zinc-400" : "bg-[#0D2C30] text-white hover:bg-[#1a3d42] shadow-xl shadow-[#0D2C30]/10"
+                  )}
+                >
+                  {isAdded ? (
+                    <>Produit ajouté <CheckCircle2 size={18} className="text-[#94C973]" /></>
+                  ) : (
+                    <>Ajouter au panier <ArrowRight size={16} /></>
+                  )}
+                </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-               <div className="space-y-6">
-                  <h3 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
-                    <Zap size={14} className="fill-[#A3E635] text-[#A3E635]"/> Présentation
-                  </h3>
-                  <p className="text-xl text-black/60 font-medium leading-relaxed">
+            {/* SPECS & DESCRIPTION */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4">
+               <div className="space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Description</h3>
+                  <p className="text-lg text-[#0D2C30]/70 leading-relaxed font-medium">
                     {product.description}
                   </p>
                </div>
-               <div className="space-y-4">
+               <div className="divide-y divide-black/5">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4">Spécifications</h3>
                   {product.specs.map((spec, i) => (
-                    <div key={i} className="flex justify-between items-center py-4 border-b border-black/5">
-                      <span className="text-[10px] font-bold uppercase text-black/40">{spec.label}</span>
-                      <span className="text-xs font-black uppercase">{spec.value}</span>
+                    <div key={i} className="flex justify-between items-center py-4">
+                      <span className="text-[10px] font-bold uppercase text-zinc-400">{spec.label}</span>
+                      <span className="text-[11px] font-black uppercase">{spec.value}</span>
                     </div>
                   ))}
                </div>
-            </div>
-
-            <div className="space-y-6">
-              <motion.button 
-               whileHover={{ scale: 1.02 }}
-               whileTap={{ scale: 0.98 }}
-               onClick={handleAddToCart}
-                className="w-full py-8 bg-[#A3E635] cursor-pointer text-black border border-black/5 rounded-[24px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl shadow-black/5 transition-all duration-500"
-              >
-                Ajouter au panier <ArrowRight size={18} />
-              </motion.button>
             </div>
 
           </section>

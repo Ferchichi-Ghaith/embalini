@@ -1,59 +1,134 @@
 "use client";
 
 import React, { useEffect, useState, Suspense } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, PackageCheck, CheckCircle2, Copy, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  FileText, CheckCircle2, Loader2, 
+  Building2, User, Phone, Mail, Download, Sparkles, PencilLine,
+  Hash, ArrowLeft, Copy
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-// --- COMPOSANT INTERNE (Logique de la page) ---
 const ValideCommandContent = () => {
   const [items, setItems] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
   const [orderId, setOrderId] = useState("");
   const [secretCode, setSecretCode] = useState("");
 
+  const [isPersonalized, setIsPersonalized] = useState(false);
+  const [personalizationDetails, setPersonalizationDetails] = useState("");
+
   const [formData, setFormData] = useState({
+    companyName: "",
+    matriculeFiscal: "",
     nom: "",
     prenom: "",
     email: "",
     telephone: "",
-    message: ""
   });
 
-  // Charger le panier depuis le localStorage
+  // Load cart from localStorage on mount
   useEffect(() => {
     const localData = localStorage.getItem("productpanierlist");
     if (localData) {
       try {
         const decodedItems = JSON.parse(localData);
         setItems(decodedItems);
-        const sum = decodedItems.reduce((acc: number, item: any) => {
-          const price = parseFloat(item.prix_total) || 0;
-          return acc + price;
-        }, 0);
+        const sum = decodedItems.reduce((acc: number, item: any) => acc + (parseFloat(item.prix_total) || 0), 0);
         setTotal(sum);
-      } catch (e) {
-        console.error("Erreur de lecture du panier local", e);
+      } catch (e) { 
+        console.error("Erreur panier:", e); 
       }
     }
   }, []);
 
+  const generatePDF = (oId: string, sCode: string) => {
+    const doc = new jsPDF();
+    
+    // Header Style
+    doc.setFillColor(13, 44, 48); // #0D2C30
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.text("EMBALINI", 14, 20);
+    doc.setFontSize(10);
+    doc.text("SOLUTIONS DE CONDITIONNEMENT DURABLES", 14, 28);
+    
+    doc.setTextColor(255, 255, 255);
+    doc.text("DEVIS PROVISOIRE", 150, 20);
+    doc.setFontSize(8);
+    doc.text(`Réf: ${oId}`, 150, 26);
+    doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, 150, 30);
+
+    // Section Client
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("INFORMATIONS CLIENT", 14, 55);
+    doc.line(14, 57, 100, 57);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    const clientY = 65;
+    doc.text(`Société: ${formData.companyName || "Individuel"}`, 14, clientY);
+    doc.text(`MF: ${formData.matriculeFiscal || "N/A"}`, 14, clientY + 6);
+    doc.text(`Contact: ${formData.prenom} ${formData.nom}`, 14, clientY + 12);
+    doc.text(`Email: ${formData.email}`, 14, clientY + 18);
+    doc.text(`Tel: ${formData.telephone}`, 14, clientY + 24);
+
+    // Table
+    autoTable(doc, {
+      startY: 100,
+      head: [['Désignation', 'Quantité', 'Prix Unitaire', 'Montant Total']],
+      body: items.map(item => [
+        item.titre, 
+        item.quantite, 
+        `${item.prix_unitaire} TND`, 
+        `${item.prix_total} TND`
+      ]),
+      headStyles: { fillColor: [148, 201, 115], textColor: [13, 44, 48] },
+      styles: { fontSize: 9 },
+    });
+
+    let finalY = (doc as any).lastAutoTable.finalY + 15;
+
+    if (isPersonalized && personalizationDetails) {
+      doc.setFont("helvetica", "bold");
+      doc.text("NOTES DE PERSONNALISATION :", 14, finalY);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text(doc.splitTextToSize(personalizationDetails, 180), 14, finalY + 7);
+      finalY += 25;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text(`TOTAL ESTIMÉ (HT) : ${total.toFixed(2)} TND`, 196, finalY, { align: 'right' });
+    
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("Ce document n'est pas une facture. Les prix sont valables 30 jours.", 14, 280);
+
+    doc.save(`Devis_Embalini_${oId}.pdf`);
+  };
+
   const handleConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitting) return;
-
+    if (isSubmitting || items.length === 0) return;
     setIsSubmitting(true);
 
-    // Génération des identifiants (côté client pour l'affichage immédiat)
     const now = Date.now();
     const newOrderId = `ORD-${now.toString().slice(-6)}`;
     const newSecretCode = now.toString(36).slice(-6).toUpperCase();
 
-    // Construction du payload pour correspondre à votre schéma Elysia (t.Object)
+    // Logic: Combined payload for backend
     const payload = {
       order_id: newOrderId,
       secret_code: newSecretCode,
@@ -61,12 +136,12 @@ const ValideCommandContent = () => {
       prenom: formData.prenom,
       email: formData.email,
       telephone: formData.telephone,
-      message: formData.message || "",
+      // Merge new UI fields into message for backend compatibility
+      message: `Société: ${formData.companyName} | MF: ${formData.matriculeFiscal} | Perso: ${personalizationDetails}`,
       total_estimation: parseFloat(total.toFixed(2)),
       currency: "TND",
-      // Mapping des items pour correspondre à Prisma items.create
       items: items.map((item) => ({
-        original_id: String(item.id || item._id || "REF-000"),
+        original_id: String(item.id || item._id),
         titre: item.titre,
         quantite: Number(item.quantite),
         prix_unitaire: parseFloat(item.prix_unitaire) || 0,
@@ -76,169 +151,229 @@ const ValideCommandContent = () => {
     };
 
     try {
-      const response = await fetch("/api/v1/command", {
+      const res = await fetch("/api/v1/command", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save order");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Erreur lors de l'enregistrement");
       }
 
-      // Succès : Nettoyage et redirection visuelle
       setOrderId(newOrderId);
       setSecretCode(newSecretCode);
       setIsSubmitted(true);
       
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("productpanierlist");
-        window.dispatchEvent(new Event("cartUpdate"));
-      }
-    } catch (error) {
-      console.error("❌ Erreur lors de la commande:", error);
-      alert("Une erreur est survenue lors de l'enregistrement de votre commande. Veuillez réessayer.");
-    } finally {
-      setIsSubmitting(false);
+      generatePDF(newOrderId, newSecretCode);
+      
+      localStorage.removeItem("productpanierlist");
+      window.dispatchEvent(new Event("cartUpdate"));
+    } catch (err: any) { 
+      alert(err.message); 
+    } finally { 
+      setIsSubmitting(false); 
     }
   };
 
-  // --- VUE SUCCÈS ---
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FBFBFB] relative overflow-hidden pt-24 pb-20 px-6">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#A3E635]/15 blur-[120px] rounded-full -z-10" />
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-sm w-full">
-          <div className="text-center mb-8">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-16 h-16 bg-[#A3E635] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <CheckCircle2 size={32} className="text-black" />
-            </motion.div>
-            <h1 className="text-3xl font-[1000] uppercase italic tracking-tighter">SUCCESS</h1>
-            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-black/40">Demande enregistrée en base</p>
-          </div>
-          <div className="bg-white border border-black/4 rounded-[32px] overflow-hidden shadow-xl p-6">
-            <div className="flex justify-between items-end mb-6">
-              <div>
-                <p className="text-[8px] font-black uppercase tracking-widest text-black/30 mb-1">ID Commande</p>
-                <p className="font-mono font-bold text-sm text-black/90">{orderId}</p>
-              </div>
-            </div>
-            <div className="p-5 bg-black rounded-2xl flex flex-col items-center gap-2 cursor-pointer group" onClick={() => navigator.clipboard.writeText(secretCode)}>
-              <span className="text-[8px] font-bold text-[#A3E635]/60 uppercase tracking-widest">Code de suivi</span>
-              <span className="font-mono text-3xl font-black text-[#A3E635] tracking-[0.4em] ml-[0.4em]">{secretCode}</span>
-              <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
-                 <Copy size={10} className="text-[#A3E635]" />
-                 <span className="text-[7px] font-bold text-[#A3E635] uppercase">Copier</span>
-              </div>
-            </div>
-          </div>
-          <Link href="/products" className="block mt-8">
-            <Button className="w-full h-14 bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-neutral-900">
-              Retour au catalogue
-            </Button>
-          </Link>
-        </motion.div>
-      </div>
-    );
+  if (isSubmitted) { 
+    return <SuccessView orderId={orderId} secretCode={secretCode} onDownload={() => generatePDF(orderId, secretCode)} />; 
   }
 
-  // --- VUE FORMULAIRE ---
   return (
     <div className="min-h-screen bg-[#FBFBFB] pt-32 pb-20 px-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col items-center text-center space-y-4 mb-16">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-20 h-20 bg-[#A3E635] rounded-full flex items-center justify-center text-black">
-            <PackageCheck size={40} />
-          </motion.div>
-          <h1 className="text-4xl md:text-6xl font-[1000] uppercase italic tracking-tighter">
-            Finaliser la demande<span className="text-[#A3E635]">.</span>
-          </h1>
-          <p className="text-black/40 font-bold uppercase text-[10px] tracking-[0.3em]">Enregistrement sécurisé de votre devis</p>
-        </div>
+      <div className="max-w-[1300px] mx-auto">
+        
+        <Link href="/" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-[#0D2C30] mb-12 transition-colors group">
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Retour au catalogue
+        </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Section Panier */}
-          <section className="space-y-6">
-            <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-              <span className="w-8 h-px bg-black/20" /> Récapitulatif
-            </h2>
-            <div className="bg-white border border-black/5 rounded-[32px] p-8 shadow-xl">
-              <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                {items.length > 0 ? items.map((item, i) => (
-                  <div key={i} className="flex justify-between items-center border-b border-black/5 pb-4">
-                    <div className="flex items-center gap-4">
-                      <img src={item.productimage || "/placeholder.png"} alt="" className="w-12 h-12 object-contain bg-gray-50 rounded-lg p-1" />
-                      <div>
-                        <p className="font-bold uppercase text-xs">{item.titre}</p>
-                        <p className="text-[10px] text-black/40 font-bold">Qté: {item.quantite}</p>
-                      </div>
-                    </div>
-                    <p className="font-black text-sm">{item.prix_total} TND</p>
-                  </div>
-                )) : <p className="text-[10px] font-bold text-black/20 uppercase">Vide...</p>}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          
+          <div className="lg:col-span-8 bg-white border border-zinc-200 rounded-[32px] overflow-hidden shadow-sm">
+            <div className="p-8 border-b border-zinc-100 bg-zinc-50/50 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight text-[#0D2C30]">Demande de Devis Officiel</h2>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">Veuillez remplir les informations de facturation</p>
               </div>
-              <div className="mt-8 flex justify-between items-end border-t pt-6 border-black/5">
-                <span className="text-[10px] font-bold uppercase text-black/40">Total Estimé</span>
-                <span className="text-4xl font-light">{total.toFixed(2)}<span className="text-sm ml-1 font-bold">TND</span></span>
-              </div>
+              <FileText className="text-zinc-200" size={32} />
             </div>
-          </section>
 
-          {/* Section Formulaire */}
-          <section className="space-y-6">
-            <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-              <span className="w-8 h-px bg-black/20" /> Vos Coordonnées
-            </h2>
-            <form className="space-y-4" onSubmit={handleConfirm}>
-              <div className="grid grid-cols-2 gap-4">
-                <input required type="text" placeholder="NOM" className="bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase outline-none focus:border-[#A3E635] transition-colors" onChange={(e) => setFormData({...formData, nom: e.target.value})} />
-                <input required type="text" placeholder="PRÉNOM" className="bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase outline-none focus:border-[#A3E635] transition-colors" onChange={(e) => setFormData({...formData, prenom: e.target.value})} />
-              </div>
-              <input required type="email" placeholder="EMAIL" className="w-full bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase outline-none focus:border-[#A3E635] transition-colors" onChange={(e) => setFormData({...formData, email: e.target.value})} />
-              <input required type="text" placeholder="TÉLÉPHONE" className="w-full bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase outline-none focus:border-[#A3E635] transition-colors" onChange={(e) => setFormData({...formData, telephone: e.target.value})} />
-              <textarea placeholder="MESSAGE (FACULTATIF)" rows={4} className="w-full bg-white border border-black/5 p-4 rounded-2xl text-[10px] font-bold uppercase outline-none focus:border-[#A3E635] transition-colors" onChange={(e) => setFormData({...formData, message: e.target.value})} />
+            <form onSubmit={handleConfirm} className="p-8 space-y-10">
               
-              <button 
-                type="submit" 
-                disabled={isSubmitting || items.length === 0}
-                className={`w-full py-6 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all duration-500 shadow-xl flex items-center justify-center gap-2 
-                ${isSubmitting ? 'bg-neutral-800 text-white cursor-wait' : 'bg-black text-[#A3E635] hover:bg-[#A3E635] hover:text-black active:scale-95'}`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="animate-spin" size={16} />
-                    Traitement...
-                  </>
-                ) : "Confirmer la commande"}
-              </button>
-            </form>
-          </section>
-        </div>
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#94C973]">
+                  <Building2 size={14} /> Informations Entreprise (Optionnel)
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <CustomInput label="Nom de la Société" placeholder="Ex: Embalini SARL" onChange={(v: string) => setFormData({...formData, companyName: v})} />
+                  <CustomInput label="Matricule Fiscal" placeholder="1234567/A/M/000" icon={<Hash size={14}/>} onChange={(v: string) => setFormData({...formData, matriculeFiscal: v})} />
+                </div>
+              </div>
 
-        <div className="mt-20 text-center">
-          <Link href="/products" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/40 hover:text-black transition-colors">
-            <ArrowLeft size={14} /> Retourner au catalogue
-          </Link>
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#94C973]">
+                  <User size={14} /> Contact Responsable
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <CustomInput label="Nom" required placeholder="Votre nom" onChange={(v: string) => setFormData({...formData, nom: v})} />
+                  <CustomInput label="Prénom" required placeholder="Votre prénom" onChange={(v: string) => setFormData({...formData, prenom: v})} />
+                  <CustomInput label="Email Professionnel" required type="email" placeholder="contact@domaine.tn" onChange={(v: string) => setFormData({...formData, email: v})} />
+                  <CustomInput label="Téléphone" required placeholder="+216 -- --- ---" onChange={(v: string) => setFormData({...formData, telephone: v})} />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-zinc-100">
+                <div className="flex items-center justify-between p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-[#94C973]">
+                      <Sparkles size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-[#0D2C30]">Personnaliser ma commande</h4>
+                      <p className="text-[10px] text-zinc-400 font-medium">Ajout de logo, marquage spécifique, etc.</p>
+                    </div>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    className="w-5 h-5 accent-[#94C973] cursor-pointer"
+                    checked={isPersonalized}
+                    onChange={() => setIsPersonalized(!isPersonalized)}
+                  />
+                </div>
+
+                <AnimatePresence>
+                  {isPersonalized && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                      <div className="mt-4 p-6 bg-white border border-[#94C973]/20 rounded-2xl">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase text-[#94C973] mb-3">
+                          <PencilLine size={14} /> Détails de la personnalisation
+                        </div>
+                        <textarea 
+                          className="w-full text-sm p-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-[#94C973] min-h-[100px] transition-all"
+                          placeholder="Décrivez votre besoin..."
+                          value={personalizationDetails}
+                          onChange={(e) => setPersonalizationDetails(e.target.value)}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                 <Button 
+                    type="submit"
+                    disabled={isSubmitting || items.length === 0}
+                    className="bg-[#0D2C30] hover:bg-[#153e43] text-white px-12 h-14 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-lg transition-all"
+                 >
+                   {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : "Confirmer"}
+                 </Button>
+              </div>
+            </form>
+          </div>
+
+          <div className="lg:col-span-4 sticky top-32">
+             <div className="bg-[#0D2C30] text-white rounded-[32px] p-8 shadow-2xl">
+                <h3 className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-8">Contenu du Devis</h3>
+                
+                <div className="space-y-6 mb-10 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                   {items.map((item, i) => (
+                      <div key={i} className="flex justify-between items-start gap-4">
+                        <div className="flex-grow">
+                           <p className="text-[11px] font-bold uppercase leading-tight">{item.titre}</p>
+                           <p className="text-[9px] opacity-40 font-bold mt-1 uppercase">Qté: {item.quantite} x {item.prix_unitaire} TND</p>
+                        </div>
+                        <p className="text-[11px] font-black">{item.prix_total} TND</p>
+                      </div>
+                   ))}
+                </div>
+
+                <div className="border-t border-white/10 pt-6 space-y-4">
+                   <div className="flex justify-between items-center opacity-60">
+                      <span className="text-[10px] font-bold uppercase">Total Hors Taxe</span>
+                      <span className="text-xs font-bold">{total.toFixed(2)} TND</span>
+                   </div>
+                   <div className="flex justify-between items-end">
+                      <span className="text-[10px] font-black uppercase text-[#94C973]">Estimation Totale</span>
+                      <span className="text-3xl font-light tracking-tighter">{total.toFixed(2)} <span className="text-sm">TND</span></span>
+                   </div>
+                </div>
+             </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// --- EXPORT PRINCIPAL ---
-export default function ValideCommandPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#FBFBFB]">
-        <div className="animate-pulse text-[10px] font-black uppercase tracking-[0.4em] text-black/20">
-          Initialisation sécurisée...
-        </div>
+const CustomInput = ({ label, icon, placeholder, required = false, type = "text", onChange }: any) => (
+  <div className="space-y-2">
+    <label className="text-[9px] font-black uppercase text-zinc-400 ml-1">
+      {label} {required && <span className="text-[#94C973]">*</span>}
+    </label>
+    <div className="relative group">
+      {icon && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-[#94C973] transition-colors">{icon}</div>}
+      <input 
+        required={required}
+        type={type}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn(
+          "w-full bg-white border border-zinc-200 p-4 rounded-xl text-[11px] font-bold uppercase outline-none focus:border-[#94C973] focus:ring-4 focus:ring-[#94C973]/5 transition-all",
+          icon ? "pl-10" : "pl-4"
+        )}
+      />
+    </div>
+  </div>
+);
+
+const SuccessView = ({ orderId, secretCode, onDownload }: any) => (
+  <div className="min-h-screen flex items-center justify-center bg-white px-6 mt-10">
+    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-lg w-full">
+      <div className="w-24 h-24 bg-[#94C973]/10 text-[#94C973] rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+        <CheckCircle2 size={48} />
       </div>
-    }>
+      <h2 className="text-3xl font-black uppercase tracking-tighter text-[#0D2C30] mb-4">Demande Envoyée !</h2>
+      <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-10">Votre devis a été généré avec succès</p>
+      
+      <div className="bg-zinc-50 border border-zinc-100 rounded-[40px] p-10 mb-10">
+        <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="text-left p-4 bg-white rounded-2xl border border-zinc-100">
+                <p className="text-[8px] font-black uppercase text-zinc-300 mb-1">Référence</p>
+                <p className="text-xs font-mono font-bold text-[#0D2C30]">{orderId}</p>
+            </div>
+            <div 
+                className="text-left p-4 bg-white rounded-2xl border border-zinc-100 cursor-pointer hover:bg-zinc-50 transition-colors group"
+                onClick={() => {
+                    navigator.clipboard.writeText(secretCode);
+                    alert("Code copié !");
+                }}
+            >
+                <div className="flex justify-between items-center mb-1">
+                    <p className="text-[8px] font-black uppercase text-zinc-300">Code Suivi</p>
+                    <Copy size={10} className="text-zinc-300 group-hover:text-[#94C973]" />
+                </div>
+                <p className="text-xs font-mono font-bold text-[#94C973]">{secretCode}</p>
+            </div>
+        </div>
+        <Button onClick={onDownload} className="w-full h-16 bg-[#0D2C30] hover:bg-[#1a3d42] text-white rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-xl flex gap-3">
+          <Download size={18} /> Télécharger le Devis PDF
+        </Button>
+      </div>
+
+      <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-[#94C973] hover:underline underline-offset-4">
+        Retourner à la boutique
+      </Link>
+    </motion.div>
+  </div>
+);
+
+export default function ValideCommandPage() { 
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-[#94C973]"/></div>}>
       <ValideCommandContent />
     </Suspense>
-  );
+  ); 
 }

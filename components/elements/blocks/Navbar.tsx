@@ -61,7 +61,7 @@ export function Navbar() {
     <header className={cn(
       "fixed top-0 z-50 w-full transition-all duration-300 border-b ",
       /* 1. Changement du vert fluo/foncé par un gris très clair (#F9FAFB) ou blanc */
-      isScrolled ? "h-10 bg-[#F9FAFB] text-black shadow-sm border-gray-200" : "h-10  border-transparent bg-[#F9FAFB]"
+      isScrolled ? "h-12 bg-[#F9FAFB] text-black shadow-sm border-gray-200" : "h-12  border-transparent bg-[#F9FAFB]"
     )}>
       <div className="container mx-auto flex h-full items-center justify-between px-6">
         
