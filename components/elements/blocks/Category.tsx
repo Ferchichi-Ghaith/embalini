@@ -17,7 +17,7 @@ const CategorySection = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/v1/category/');
+        const response = await fetch('/api/v1/category/');
         const data = await response.json();
         
         const formattedData = data.map((cat: any, index: number): Category => {
