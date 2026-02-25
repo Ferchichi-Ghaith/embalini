@@ -144,7 +144,7 @@ export default function CommandAdminPage() {
     // Note: On utilise total_estimation car c'est un flux admin
     const totalHT = Number(cmd.total_estimation);
     const tvaRate = 0.19;
-    const fraisLivraison = 7;
+    const fraisLivraison = 8;
     const montantTVA = totalHT * tvaRate;
     const totalTTC = totalHT + montantTVA + fraisLivraison;
   

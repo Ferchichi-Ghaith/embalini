@@ -55,7 +55,7 @@ const ValideCommandContent = () => {
     doc.rect(0, 0, 210, 297, 'F');
     // --- Configuration des montants ---
     const tvaRate = 0.19;
-    const fraisLivraison = 7;
+    const fraisLivraison = 8;
     const montantTVA = total * tvaRate;
     const totalTTC = total + montantTVA + fraisLivraison;
 
