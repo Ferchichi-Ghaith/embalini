@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import React, { useState, useEffect, useCallback } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Plus, Minus, ArrowRight, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ interface ProductSpec {
 interface Product {
   id: string;
   title: string;
-  nom?: string; 
+  nom?: string;
   subtitle: string;
   price: number;
   image: string;
@@ -37,14 +37,15 @@ const ProductPage = () => {
   const params = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [quantity, setQuantity] = useState<number>(1);
-  const [isAdded, setIsAdded] = useState(false);
   
+  // 1. Allow quantity to be number OR empty string for better UX while typing
+  const [quantity, setQuantity] = useState<number | "">(1);
+  const [isAdded, setIsAdded] = useState(false);
+
   const { scrollY } = useScroll();
   const yImage = useTransform(scrollY, [0, 500], [0, -80]);
 
   // Mocking the accountType based on your instructions
-  // In a real app, this would come from an Auth Context
   const accountType = "COMPANY"; 
 
   const fetchProduct = useCallback(async () => {
@@ -65,26 +66,48 @@ const ProductPage = () => {
     if (params.id) fetchProduct();
   }, [fetchProduct]);
 
-  // --- Optimized Cart Logic ---
+  // --- Input Handlers ---
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    
+    // Allow empty string so user can backspace and type "22" without leading "1"
+    if (rawValue === "") {
+      setQuantity("");
+      return;
+    }
+
+    const numValue = parseInt(rawValue, 10);
+    if (!isNaN(numValue)) {
+      setQuantity(numValue);
+    }
+  };
+
+  const handleBlur = () => {
+    // Safety check: if user leaves it empty or 0, reset to 1
+    if (quantity === "" || quantity < 1) {
+      setQuantity(1);
+    }
+  };
+
   const handleAddToCart = () => {
-    if (!product) return;
+    if (!product || quantity === "") return;
 
     const currentCart: CartItem[] = JSON.parse(localStorage.getItem("productpanierlist") || "[]");
-    
-    // Check if item already exists to update quantity instead of duplicating
     const existingItemIndex = currentCart.findIndex(item => item.id === product.id);
     
+    const qtyToAdd = Number(quantity);
+
     if (existingItemIndex > -1) {
-      currentCart[existingItemIndex].quantite += quantity;
+      currentCart[existingItemIndex].quantite += qtyToAdd;
       currentCart[existingItemIndex].prix_total = 
         (currentCart[existingItemIndex].quantite * product.price).toFixed(2);
     } else {
       currentCart.push({
         id: product.id,
         titre: product.title || product.nom || "Produit",
-        quantite: quantity,
+        quantite: qtyToAdd,
         prix_unitaire: product.price,
-        prix_total: (product.price * quantity).toFixed(2),
+        prix_total: (product.price * qtyToAdd).toFixed(2),
         productimage: product.image,
       });
     }
@@ -92,7 +115,6 @@ const ProductPage = () => {
     localStorage.setItem("productpanierlist", JSON.stringify(currentCart));
     window.dispatchEvent(new Event("cartUpdate"));
     
-    // Feedback UI
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
@@ -110,7 +132,6 @@ const ProductPage = () => {
 
   return (
     <div className="min-h-screen bg-[#FBFBFB] text-[#0D2C30] selection:bg-[#94C973] selection:text-white">
-      
       <main className="pt-32 pb-20 px-6 md:px-12 max-w-[1600px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 xl:gap-32 items-start">
           
@@ -120,7 +141,6 @@ const ProductPage = () => {
               style={{ y: yImage }}
               className="relative aspect-square bg-zinc-100 rounded-[48px] overflow-hidden flex items-center justify-center border border-black/5"
             >
-              {/* ETAT BADGE */}
               {product.etat && (
                 <div className="absolute top-8 left-8 z-10 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-black/5 shadow-sm">
                   <span className="text-[9px] font-black uppercase tracking-tighter">{product.etat}</span>
@@ -140,7 +160,6 @@ const ProductPage = () => {
 
           {/* RIGHT: CONTENT */}
           <section className="flex flex-col gap-12">
-            
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-[#94C973]">
                 <Zap size={14} fill="currentColor" />
@@ -153,28 +172,47 @@ const ProductPage = () => {
 
             {/* PRICE CARD */}
             <div className="p-10 rounded-[40px] bg-white border border-black/5 shadow-sm space-y-8">
-               <div className="flex justify-between items-end">
+               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
                       {accountType === "COMPANY" ? "Tarif Pro (HT)" : "Prix Public TTC"}
                     </p>
-                    <h2 className="text-6xl font-light tracking-tighter">
-                      {(product.price * quantity).toLocaleString()}
+                    <h2 className="text-2xl font-light tracking-tighter">
+                      {(product.price * (Number(quantity) || 0)).toLocaleString()}
                       <span className="text-2xl ml-2 font-medium">TND</span>
                     </h2>
                   </div>
                   
                   {/* QUANTITY PICKER */}
-                  <div className="flex items-center bg-zinc-50 rounded-2xl p-1.5 border border-zinc-100">
-                    <button onClick={() => setQuantity(q => Math.max(1, q-1))} className="p-3 hover:bg-white hover:shadow-sm rounded-xl transition-all"><Minus size={16}/></button>
-                    <span className="w-10 text-center font-bold">{quantity}</span>
-                    <button onClick={() => setQuantity(q => q+1)} className="p-3 hover:bg-white hover:shadow-sm rounded-xl transition-all"><Plus size={16}/></button>
+                  <div className="flex items-center bg-zinc-50 rounded-2xl p-1 border border-zinc-100">
+                    <button 
+                      onClick={() => setQuantity(q => Math.max(1, (Number(q) || 1) - 1))} 
+                      className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all"
+                    >
+                      <Minus size={16}/>
+                    </button>
+
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      onFocus={(e) => e.target.select()}
+                      className="w-12 text-center bg-transparent border-none focus:outline-none focus:ring-0 font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+
+                    <button 
+                      onClick={() => setQuantity(q => (Number(q) || 0) + 1)} 
+                      className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all"
+                    >
+                      <Plus size={16}/>
+                    </button>
                   </div>
                </div>
 
                <button 
                   onClick={handleAddToCart}
-                  disabled={isAdded}
+                  disabled={isAdded || quantity === "" || quantity < 1}
                   className={cn(
                     "w-full py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] transition-all duration-500 flex items-center justify-center gap-3",
                     isAdded ? "bg-zinc-100 text-zinc-400" : "bg-[#0D2C30] text-white hover:bg-[#1a3d42] shadow-xl shadow-[#0D2C30]/10"
@@ -206,7 +244,6 @@ const ProductPage = () => {
                   ))}
                </div>
             </div>
-
           </section>
         </div>
       </main>

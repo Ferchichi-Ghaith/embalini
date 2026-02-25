@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FileText, CheckCircle2, Loader2, 
-  Building2, User, Phone, Mail, Download, Sparkles, PencilLine,
+  Building2, User, Download, Sparkles, PencilLine,
   Hash, ArrowLeft, Copy
 } from "lucide-react";
 import Link from "next/link";
@@ -33,7 +33,6 @@ const ValideCommandContent = () => {
     telephone: "",
   });
 
-  // Load cart from localStorage on mount
   useEffect(() => {
     const localData = localStorage.getItem("productpanierlist");
     if (localData) {
@@ -50,71 +49,122 @@ const ValideCommandContent = () => {
 
   const generatePDF = (oId: string, sCode: string) => {
     const doc = new jsPDF();
-    
-    // Header Style
-    doc.setFillColor(13, 44, 48); // #0D2C30
-    doc.rect(0, 0, 210, 40, 'F');
-    
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.text("EMBALINI", 14, 20);
-    doc.setFontSize(10);
-    doc.text("SOLUTIONS DE CONDITIONNEMENT DURABLES", 14, 28);
-    
-    doc.setTextColor(255, 255, 255);
-    doc.text("DEVIS PROVISOIRE", 150, 20);
-    doc.setFontSize(8);
-    doc.text(`Réf: ${oId}`, 150, 26);
-    doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, 150, 30);
+    // --- 0. Fond de page gris très clair (#F7F7F7) ---
+    // On dessine un rectangle plein sur toute la surface A4 (210x297mm)
+    doc.setFillColor(247, 247, 247); // Équivalent de #F7F7F7
+    doc.rect(0, 0, 210, 297, 'F');
+    // --- Configuration des montants ---
+    const tvaRate = 0.19;
+    const fraisLivraison = 7;
+    const montantTVA = total * tvaRate;
+    const totalTTC = total + montantTVA + fraisLivraison;
 
-    // Section Client
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(11);
+    // --- 1. Header (Full White) ---
+    const logoUrl = "/images/logodevis.png"; 
+    try {
+      // Largeur fixée à 85mm comme demandé
+      doc.addImage(logoUrl, 'PNG', 14, 10, 85, 0); 
+    } catch (e) {
+      doc.setFontSize(22);
+      doc.setTextColor(13, 44, 48);
+      doc.setFont("helvetica", "bold");
+      doc.text("EMBALINI", 14, 25);
+    }
+    
+    // Infos Devis à droite (alignées verticalement avec le logo)
+    doc.setTextColor(13, 44, 48);
+    doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text("INFORMATIONS CLIENT", 14, 55);
-    doc.line(14, 57, 100, 57);
+    doc.text("DEVIS ", 196, 20, { align: 'right' });
+    
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    doc.text(`Référence : ${oId}`, 196, 27, { align: 'right' });
+    doc.text(`Date : ${new Date().toLocaleDateString('fr-FR')}`, 196, 32, { align: 'right' });
+    doc.text(`Code de suivi : ${sCode}`, 196, 37, { align: 'right' });
+
+    // --- 2. Section Client (Position Y ajustée pour un grand logo) ---
+    // On tire une ligne un peu plus bas pour laisser respirer le logo
+    doc.setDrawColor(230, 230, 230);
+    doc.line(14, 55, 196, 55); 
+
+    doc.setTextColor(13, 44, 48);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("DESTINATAIRE", 14, 65);
     
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    const clientY = 65;
-    doc.text(`Société: ${formData.companyName || "Individuel"}`, 14, clientY);
-    doc.text(`MF: ${formData.matriculeFiscal || "N/A"}`, 14, clientY + 6);
-    doc.text(`Contact: ${formData.prenom} ${formData.nom}`, 14, clientY + 12);
-    doc.text(`Email: ${formData.email}`, 14, clientY + 18);
-    doc.text(`Tel: ${formData.telephone}`, 14, clientY + 24);
+    doc.setTextColor(0);
+    const isCompany = !!formData.companyName;
+    
+    // Position de départ des infos client
+    let clientInfoY = 72;
+    doc.text(isCompany ? `Société : ${formData.companyName}` : "Type : Client Individuel", 14, clientInfoY);
+    doc.text(`Matricule Fiscal : ${formData.matriculeFiscal || "N/A"}`, 14, clientInfoY + 6);
+    doc.text(`Contact : ${formData.prenom} ${formData.nom}`, 14, clientInfoY + 12);
+    doc.text(`Email : ${formData.email}`, 14, clientInfoY + 18);
+    doc.text(`Tél : ${formData.telephone}`, 14, clientInfoY + 24);
 
-    // Table
+    // --- 3. Tableau des produits (Décalé vers le bas) ---
     autoTable(doc, {
-      startY: 100,
+      startY: 110, // Augmenté de 100 à 110 pour éviter les chevauchements
       head: [['Désignation', 'Quantité', 'Prix Unitaire', 'Montant Total']],
       body: items.map(item => [
         item.titre, 
         item.quantite, 
-        `${item.prix_unitaire} TND`, 
-        `${item.prix_total} TND`
+        `${parseFloat(item.prix_unitaire).toFixed(2)} TND`, 
+        `${parseFloat(item.prix_total).toFixed(2)} TND`
       ]),
-      headStyles: { fillColor: [148, 201, 115], textColor: [13, 44, 48] },
-      styles: { fontSize: 9 },
+      headStyles: { 
+        fillColor: [13, 44, 48], 
+        textColor: [255, 255, 255],
+        fontStyle: 'bold' 
+      },
+      alternateRowStyles: { fillColor: [250, 250, 250] },
+      styles: { fontSize: 9, cellPadding: 5 },
     });
 
+    // --- 4. Récapitulatif Financier ---
     let finalY = (doc as any).lastAutoTable.finalY + 15;
-
+    
     if (isPersonalized && personalizationDetails) {
       doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
       doc.text("NOTES DE PERSONNALISATION :", 14, finalY);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.text(doc.splitTextToSize(personalizationDetails, 180), 14, finalY + 7);
-      finalY += 25;
+      const splitNotes = doc.splitTextToSize(personalizationDetails, 110);
+      doc.text(splitNotes, 14, finalY + 6);
     }
+
+    const rightAlignX = 196;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    
+    doc.text(`Total Hors Taxe :`, 130, finalY, { align: 'left' });
+    doc.text(`${total.toFixed(2)} TND`, rightAlignX, finalY, { align: 'right' });
+    
+    doc.text(`TVA (19%) :`, 130, finalY + 7, { align: 'left' });
+    doc.text(`${montantTVA.toFixed(2)} TND`, rightAlignX, finalY + 7, { align: 'right' });
+    
+    doc.text(`Frais de livraison :`, 130, finalY + 14, { align: 'left' });
+    doc.text(`${fraisLivraison.toFixed(2)} TND`, rightAlignX, finalY + 14, { align: 'right' });
+
+    doc.setDrawColor(148, 201, 115);
+    doc.setLineWidth(0.5);
+    doc.line(130, finalY + 18, 196, finalY + 18);
 
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text(`TOTAL ESTIMÉ (HT) : ${total.toFixed(2)} TND`, 196, finalY, { align: 'right' });
-    
-    doc.setFontSize(8);
+    doc.text(`TOTAL TTC :`, 130, finalY + 25, { align: 'left' });
+    doc.text(`${totalTTC.toFixed(2)} TND`, rightAlignX, finalY + 25, { align: 'right' });
+
+    // --- 5. Footer ---
+    doc.setFontSize(10);
     doc.setTextColor(150);
-    doc.text("Ce document n'est pas une facture. Les prix sont valables 30 jours.", 14, 280);
+    doc.setFont("helvetica", "italic");
+    const footerText = "Ce document est un devis valable 30 jours. Embalini - Sustainable Packaging Range.";
+    doc.text(footerText, 105, 285, { align: 'center' });
 
     doc.save(`Devis_Embalini_${oId}.pdf`);
   };
@@ -124,33 +174,44 @@ const ValideCommandContent = () => {
     if (isSubmitting || items.length === 0) return;
     setIsSubmitting(true);
 
-    const now = Date.now();
-    const newOrderId = `ORD-${now.toString().slice(-6)}`;
-    const newSecretCode = now.toString(36).slice(-6).toUpperCase();
-
-    // Logic: Combined payload for backend
-    const payload = {
-      order_id: newOrderId,
-      secret_code: newSecretCode,
-      nom: formData.nom,
-      prenom: formData.prenom,
-      email: formData.email,
-      telephone: formData.telephone,
-      // Merge new UI fields into message for backend compatibility
-      message: `Société: ${formData.companyName} | MF: ${formData.matriculeFiscal} | Perso: ${personalizationDetails}`,
-      total_estimation: parseFloat(total.toFixed(2)),
-      currency: "TND",
-      items: items.map((item) => ({
-        original_id: String(item.id || item._id),
-        titre: item.titre,
-        quantite: Number(item.quantite),
-        prix_unitaire: parseFloat(item.prix_unitaire) || 0,
-        prix_total: parseFloat(item.prix_total) || 0,
-        productimage: item.productimage || ""
-      }))
-    };
-
     try {
+      // 1. Get the current count from the server
+      const countRes = await fetch("/api/v1/command/count");
+      const { total: currentCount } = await countRes.json();
+
+      // 2. Format the custom Order ID (ORD-26-0001)
+      const yearFix = new Date().getFullYear().toString().slice(-2);
+      const nextNumber = (currentCount + 1).toString().padStart(4, '0');
+      const generatedOrderId = `ORD-${yearFix}-${nextNumber}`;
+      
+      const newSecretCode = Date.now().toString(36).slice(-6).toUpperCase();
+
+      // 3. Prepare Payload with new fields
+      const payload = {
+        order_id: generatedOrderId,
+        secret_code: newSecretCode,
+        nom: formData.nom,
+        prenom: formData.prenom,
+        email: formData.email,
+        telephone: formData.telephone,
+        // Set account type based on company name presence
+        accountType: formData.companyName ? "COMPANY" : "INDIVIDUAL",
+        // Initial state for the 'etat' field
+        etat: "EN_ATTENTE",
+        // Map matricule and notes to message
+        message: `MF: ${formData.matriculeFiscal || 'N/A'} | Perso: ${personalizationDetails}`,
+        total_estimation: parseFloat(total.toFixed(2)),
+        currency: "TND",
+        items: items.map((item) => ({
+          original_id: String(item.id || item._id),
+          titre: item.titre,
+          quantite: Number(item.quantite),
+          prix_unitaire: parseFloat(item.prix_unitaire) || 0,
+          prix_total: parseFloat(item.prix_total) || 0,
+          productimage: item.productimage || ""
+        }))
+      };
+
       const res = await fetch("/api/v1/command", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -162,11 +223,11 @@ const ValideCommandContent = () => {
         throw new Error(errorData.error || "Erreur lors de l'enregistrement");
       }
 
-      setOrderId(newOrderId);
+      setOrderId(generatedOrderId);
       setSecretCode(newSecretCode);
       setIsSubmitted(true);
       
-      generatePDF(newOrderId, newSecretCode);
+      generatePDF(generatedOrderId, newSecretCode);
       
       localStorage.removeItem("productpanierlist");
       window.dispatchEvent(new Event("cartUpdate"));
@@ -184,13 +245,11 @@ const ValideCommandContent = () => {
   return (
     <div className="min-h-screen bg-[#FBFBFB] pt-32 pb-20 px-6">
       <div className="max-w-[1300px] mx-auto">
-        
         <Link href="/" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-[#0D2C30] mb-12 transition-colors group">
           <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Retour au catalogue
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          
           <div className="lg:col-span-8 bg-white border border-zinc-200 rounded-[32px] overflow-hidden shadow-sm">
             <div className="p-8 border-b border-zinc-100 bg-zinc-50/50 flex justify-between items-center">
               <div>
@@ -201,7 +260,6 @@ const ValideCommandContent = () => {
             </div>
 
             <form onSubmit={handleConfirm} className="p-8 space-y-10">
-              
               <div className="space-y-6">
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#94C973]">
                   <Building2 size={14} /> Informations Entreprise (Optionnel)
@@ -277,7 +335,6 @@ const ValideCommandContent = () => {
           <div className="lg:col-span-4 sticky top-32">
              <div className="bg-[#0D2C30] text-white rounded-[32px] p-8 shadow-2xl">
                 <h3 className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-8">Contenu du Devis</h3>
-                
                 <div className="space-y-6 mb-10 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                    {items.map((item, i) => (
                       <div key={i} className="flex justify-between items-start gap-4">

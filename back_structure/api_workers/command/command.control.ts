@@ -91,6 +91,21 @@ export const commandController = new Elysia({
       status: t.Optional(t.Enum(OrderStatus))
     })
   })
+  // 1. GET /command/count
+  // IMPORTANT: This must come BEFORE the /:secret_code route
+  .get("/count", async ({ set }) => {
+    try {
+      const count = await commandServices.countCommands();
+      return { 
+        total: count,
+        timestamp: new Date().toISOString()
+      };
+    } catch (e) {
+      console.error("Count Error:", e);
+      set.status = 500;
+      return { error: "Failed to retrieve command count" };
+    }
+  })
 
   // DELETE /command/:id
   .delete("/:id", async ({ params: { id }, set }) => {

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, ShoppingCart, Trash2, Search, ClipboardList } from "lucide-react";
+import { Menu, ShoppingCart, Trash2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -60,17 +60,16 @@ export function Navbar() {
   return (
     <header className={cn(
       "fixed top-0 z-50 w-full transition-all duration-300 border-b ",
-      /* 1. Changement du vert fluo/foncé par un gris très clair (#F9FAFB) ou blanc */
-      isScrolled ? "h-12 bg-[#F9FAFB] text-black shadow-sm border-gray-200" : "h-12  border-transparent bg-[#F9FAFB]"
+      isScrolled ? "h-12 bg-[#F9FAFB] text-black shadow-sm border-gray-200" : "h-12 border-transparent bg-[#F9FAFB]"
     )}>
       <div className="container mx-auto flex h-full items-center justify-between px-6">
         
-        {/* 2 & 3. LOGO (Contenant la plante) - Taille ajustée pour ne pas être trop massif */}
+        {/* LOGO */}
         <Link href="/" className="z-50 group flex items-center">
           <img 
             src="/images/logo.svg" 
             alt="Embalini Logo" 
-            className="w-32 h-auto object-contain" /* Ajusté pour une meilleure intégration */
+            className="w-32 h-auto object-contain" 
           />
         </Link>
 
@@ -98,18 +97,21 @@ export function Navbar() {
                 )}
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="bg-white">
-              <div className="mx-auto w-full max-w-md">
-                <DrawerHeader>
+            <DrawerContent className="bg-white h-[85vh] md:h-[70vh]"> {/* Fixed height to ensure layout works */}
+              <div className="mx-auto w-full max-w-md flex flex-col h-full overflow-hidden">
+                
+                {/* HEADER - Fixed */}
+                <DrawerHeader className="flex-shrink-0">
                   <DrawerTitle className="text-2xl font-black uppercase italic text-black">Votre Panier</DrawerTitle>
                   <DrawerDescription>Vous avez {cartItems.length} article(s) dans votre sélection.</DrawerDescription>
                 </DrawerHeader>
                 
-                <div className="p-4 max-h-[40vh] overflow-y-auto">
+                {/* ITEMS LIST - Scrollable */}
+                <div className="flex-1 overflow-y-auto px-4 py-2">
                   {cartItems.length > 0 ? (
                     <div className="space-y-4">
                       {cartItems.map((item, index) => (
-                        <div key={index} className="flex items-center gap-4 border-b pb-4 group">
+                        <div key={index} className="flex items-center gap-4 border-b pb-4">
                           <div className="h-16 w-16 rounded-xl bg-[#F4F4F4] overflow-hidden flex-shrink-0 border border-black/5">
                             <img 
                               src={item.productimage || "/placeholder.png"} 
@@ -126,7 +128,7 @@ export function Navbar() {
                             variant="ghost" 
                             size="icon" 
                             onClick={() => removeItem(index)}
-                            className="text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                            className="text-gray-300 hover:text-red-500 hover:bg-red-50"
                           >
                             <Trash2 size={18} />
                           </Button>
@@ -134,16 +136,15 @@ export function Navbar() {
                       ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-5 space-y-2">
-                      <div className="p-4 bg-gray-50 rounded-full text-gray-300">
-                        <ShoppingCart size={40} />
-                      </div>
+                    <div className="flex flex-col items-center justify-center h-full space-y-2">
+                      <ShoppingCart size={40} className="text-gray-200" />
                       <p className="text-gray-400 font-medium italic">Le panier est vide</p>
                     </div>
                   )}
                 </div>
 
-                <DrawerFooter className="gap-2 pt-6 border-t">
+                {/* FOOTER - Fixed at the bottom */}
+                <DrawerFooter className="flex-shrink-0 gap-2 border-t bg-white p-4">
                   <Button 
                     disabled={cartItems.length === 0}
                     onClick={() => {
@@ -151,28 +152,31 @@ export function Navbar() {
                       window.location.href = `/validecommand`;
                     }}
                     className={cn(
-                      "w-full font-black uppercase tracking-widest transition-all py-7 rounded-2xl",
-                      /* Remplacement du bouton vert fluo par un noir élégant ou gris charte */
+                      "w-full font-black uppercase tracking-widest py-6 rounded-2xl",
                       cartItems.length > 0 
-                        ? "bg-black text-white hover:bg-gray-800 cursor-pointer" 
-                        : "bg-gray-100 text-gray-400 cursor-not-allowed opacity-70"
+                        ? "bg-black text-white hover:bg-gray-800" 
+                        : "bg-gray-100 text-gray-400 opacity-70"
                     )}
                   >
                     {cartItems.length > 0 ? "Valider la commande" : "Panier Vide"}
                   </Button>
                   
-                  <div className="flex flex-col gap-2 w-full mt-2">
-                    <DrawerClose asChild>
-                      <Link href="/products" className="w-full">
-                        <Button 
-                          variant="ghost" 
-                          className="w-full text-[10px] uppercase font-bold tracking-widest opacity-50 hover:opacity-100 transition-opacity text-black"
-                        >
-                          Continuer mes achats
-                        </Button>
-                      </Link>
-                    </DrawerClose>
-                  </div>
+                  {/* Follow Order Button - Always Visible here on Desktop/Panier */}
+                  <Link href="/check-command" className="w-full">
+                    <Button variant="outline" className="w-full border-black text-black font-black uppercase italic py-6 rounded-2xl flex gap-3 hover:bg-gray-50 transition-all">
+                      <Search size={18} />
+                      Suivre ma commande
+                    </Button>
+                  </Link>
+                  
+                  <DrawerClose asChild>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full text-[10px] uppercase font-bold tracking-widest opacity-50 hover:opacity-100 transition-opacity text-black h-auto py-2"
+                    >
+                      Continuer mes achats
+                    </Button>
+                  </DrawerClose>
                 </DrawerFooter>
               </div>
             </DrawerContent>
@@ -186,9 +190,9 @@ export function Navbar() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-full bg-white text-black border-none flex flex-col items-center justify-center">
+              <SheetContent side="right" className="w-full bg-white flex flex-col items-center justify-center p-0">
                 <DialogTitle className="sr-only">Menu de navigation</DialogTitle>
-                <ul className="space-y-8 text-center flex flex-col items-center">
+                <ul className="space-y-8 text-center flex flex-col items-center w-full">
                   {navigationItems.map((item) => (
                     <li key={item.name}>
                       <SheetClose asChild>
@@ -198,10 +202,12 @@ export function Navbar() {
                       </SheetClose>
                     </li>
                   ))}
-                  <li className=" w-full px-10">
+                  
+                  {/* Fixed Button for Mobile Menu */}
+                  <li className="w-full px-10 pt-4">
                     <SheetClose asChild>
-                      <Link href="/check-command">
-                        <Button variant="outline" className="w-full bg-black text-white font-black uppercase italic py-7 rounded-2xl flex gap-3">
+                      <Link href="/check-command" className="w-full">
+                        <Button variant="outline" className="w-full bg-black text-white font-black uppercase italic py-7 rounded-2xl flex gap-3 justify-center">
                           <Search size={20} />
                           Suivre ma commande
                         </Button>

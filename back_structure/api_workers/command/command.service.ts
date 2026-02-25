@@ -10,6 +10,12 @@ export const commandServices = {
     });
   },
 
+  countCommands: async () => {
+    // This uses a highly optimized SQL "COUNT" via Prisma
+    // It does not fetch the data, only the number of records
+    return await prisma.commands.count();
+  },
+
   // Create command with nested items
   create: async (data: any) => {
     const { items, ...orderData } = data;
