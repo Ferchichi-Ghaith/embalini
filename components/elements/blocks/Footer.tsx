@@ -83,7 +83,7 @@ const Footer = ({ userAccountType = "INDIVIDUAL" }: FooterProps) => {
             <div className="space-y-2">
               <p className="text-xl font-light">Medjez el Bab</p>
               <p className="text-sm text-white/40 uppercase tracking-widest">Béja, Tunisie</p>
-              <a href="#" className="flex items-center gap-2 text-[10px] font-bold text-[#94C973] uppercase tracking-widest mt-4 hover:gap-4 transition-all">
+              <a href="https://share.google/iQqgrDExgm5Np3mxU" target='_blank'  className="flex items-center gap-2 text-[10px] font-bold text-[#94C973] uppercase tracking-widest mt-4 hover:gap-4 transition-all">
                 Voir sur la carte <ArrowUpRight size={14}/>
               </a>
             </div>
@@ -127,12 +127,12 @@ const Footer = ({ userAccountType = "INDIVIDUAL" }: FooterProps) => {
 
         {/* Bottom Credits */}
         <div className="pt-12 border-t border-white/5 flex flex-col lg:flex-row justify-between items-center gap-8">
-          <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/20">
+          <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/80">
             © {currentYear} Embalini • L'art du sur-mesure tunisien.
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-[9px] font-bold uppercase tracking-widest text-white/20 italic">Direction Artistique par</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-white/80 italic">Sponsored By</span>
             <a 
             target='_blank'
               href="https://www.zoz.tn" 
