@@ -94,11 +94,11 @@ const Footer = ({ userAccountType = "INDIVIDUAL" }: FooterProps) => {
             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Digital</h4>
             <div className="flex flex-col gap-4">
               {[
-                { name: "Facebook", icon: <Facebook size={14}/>, url: "#" },
+                { name: "Facebook", icon: <Facebook size={14}/>, url: "https://www.facebook.com/share/1BGtBcPevK/" },
                 { name: "WhatsApp", icon: <MessageSquare size={14}/>, url: "https://wa.me/21698154061" },
-                { name: "Instagram", icon: <Globe size={14}/>, url: "#" }
+                { name: "Instagram", icon: <Globe size={14}/>, url: "https://www.instagram.com/embalini.tn?igsh=MWM2aWx3cHYwNnl1MQ==" }
               ].map((link) => (
-                <a key={link.name} href={link.url} className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-white/60 hover:text-white transition-colors group">
+                <a key={link.name} href={link.url} target="_blank" className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-white/60 hover:text-white transition-colors group">
                   <span className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#94C973] group-hover:text-[#94C973] transition-all">
                     {link.icon}
                   </span>

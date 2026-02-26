@@ -41,7 +41,6 @@ const Page = () => {
     <main className="min-h-screen bg-[#FBFBFB]">
       <EmbaliniHero />
       <CategorySection/>
- 
       <SustainabilityFocus/>
       
     </main>
