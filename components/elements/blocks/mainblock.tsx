@@ -43,7 +43,7 @@ const SustainabilityFocus = () => {
   return (
     <div className="flex flex-col w-full">
       {/* SECTION 1: Green Embalini (The Why) */}
-      <section className="relative overflow-hidden py-24 px-6 md:px-12 lg:px-24 bg-white">
+      <section className="relative overflow-hidden py-24 px-6 md:px-12 lg:px-24 ">
         <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-600/10 hidden md:block" />
         
         <div className="max-w-7xl mx-auto">
@@ -99,7 +99,7 @@ const SustainabilityFocus = () => {
       </section>
 
       {/* SECTION 2: Process Section (The How) */}
-      <section className="relative py-32 px-6 bg-[#F9F9F7] overflow-hidden">
+      <section className="relative py-32 px-6  overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
         <div className="container mx-auto max-w-[1400px] relative z-10">
@@ -167,7 +167,7 @@ const SustainabilityFocus = () => {
       </section>
 
       {/* SECTION 3: CSR Quote (The Vision) */}
-      <section className="relative overflow-hidden bg-white py-24 px-6">
+      <section className="relative overflow-hidden  py-24 px-6">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-50 rounded-full blur-3xl opacity-50" />
         
         <div className="max-w-4xl mx-auto relative">
