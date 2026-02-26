@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Drawer, DrawerClose, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { useEdgeStore } from "@/lib/edge"
 
 const API_URL = "/api/v1/produit"
 const CAT_API_URL = "/api/v1/category"
@@ -28,21 +29,26 @@ interface Spec {
 }
 
 export default function ProductAdminPage() {
+  const { edgestore } = useEdgeStore()
+  
   const [products, setProducts] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null)
+  
+  const [file, setFile] = useState<File | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [formData, setFormData] = useState({
     title: "",  
     price: "", 
-    image: "",
+    image: "", 
     description: "",
     categoryId: "",
-    etat: "NEW",
+    etat: "NEW", 
     specs: [] as Spec[]
   })
 
@@ -57,34 +63,86 @@ export default function ProductAdminPage() {
     } catch (error) { console.error(error) } finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => { 
+    fetchData() 
+    return () => {
+      // Cleanup preview URLs on unmount
+      if (formData.image.startsWith('blob:')) URL.revokeObjectURL(formData.image)
+    }
+  }, [])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0]
+    if (selectedFile) {
+      if (formData.image.startsWith('blob:')) URL.revokeObjectURL(formData.image)
+      setFile(selectedFile)
+      setFormData(prev => ({ ...prev, image: URL.createObjectURL(selectedFile) }))
+    }
+  }
 
   const handleSave = async () => {
     if (!formData.categoryId) return alert("Please select a category")
     setIsSubmitting(true)
-    const method = selectedProduct ? "PATCH" : "POST"
-    const url = selectedProduct ? `${API_URL}/${selectedProduct.id}` : API_URL
+    
     try {
+      let finalImageUrl = formData.image
+
+      // 1. EdgeStore Logic (Fresh Instance for Create/Update)
+      if (file) {
+        const res = await edgestore.Emablini.upload({
+          file,
+          onProgressChange: (progress) => setUploadProgress(progress),
+          options: {
+            // Replace old cloud image if updating an existing product
+            replaceTargetUrl: selectedProduct?.image || undefined,
+          }
+        })
+        finalImageUrl = res.url
+      }
+
+      const method = selectedProduct ? "PATCH" : "POST"
+      const url = selectedProduct ? `${API_URL}/${selectedProduct.id}` : API_URL
+      
+      // 2. Database Authorization
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, price: parseFloat(formData.price) })
+        body: JSON.stringify({ 
+          ...formData, 
+          image: finalImageUrl,
+          price: parseFloat(formData.price) 
+        })
       })
-      if (response.ok) { setIsOpen(false); fetchData() }
-    } catch (error) { console.error(error) } finally { setIsSubmitting(false) }
+
+      if (response.ok) { 
+        setIsOpen(false)
+        setFile(null)
+        setUploadProgress(0)
+        fetchData() 
+      }
+    } catch (error) { 
+      console.error("Save failed:", error) 
+    } finally { 
+      setIsSubmitting(false) 
+    }
   }
 
-  const handleDelete = async (id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id))
-    try { await fetch(`${API_URL}/${id}`, { method: "DELETE" }) } catch (e) { fetchData() }
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => setFormData(prev => ({ ...prev, image: reader.result as string }))
-      reader.readAsDataURL(file)
+  const handleDelete = async (product: any) => {
+    // Optimistic UI
+    setProducts(prev => prev.filter(p => p.id !== product.id))
+    
+    try { 
+      const res = await fetch(`${API_URL}/${product.id}`, { method: "DELETE" }) 
+      
+      // If DB delete is successful, purge from EdgeStore
+      if (res.ok && product.image) {
+        await edgestore.Emablini.delete({
+          url: product.image,
+        })
+      }
+    } catch (e) { 
+      console.error("Deletion Error:", e)
+      fetchData() 
     }
   }
 
@@ -104,6 +162,8 @@ export default function ProductAdminPage() {
           <Button 
             onClick={() => {
               setSelectedProduct(null)
+              setFile(null)
+              setUploadProgress(0)
               setFormData({ title: "", price: "", image: "", description: "", categoryId: "", etat: "NEW", specs: [] })
               setIsOpen(true)
             }}
@@ -156,6 +216,8 @@ export default function ProductAdminPage() {
                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white hover:shadow-md transition-all"
                             onClick={() => {
                               setSelectedProduct(item);
+                              setFile(null);
+                              setUploadProgress(0);
                               setFormData({ ...item, price: item.price.toString(), categoryId: item.categoryId || "", etat: item.etat || "NEW" });
                               setIsOpen(true);
                             }}
@@ -168,14 +230,14 @@ export default function ProductAdminPage() {
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-[32px] border-none p-8">
+                            <AlertDialogContent className="rounded-[32px] border-none p-8 shadow-2xl">
                               <AlertDialogHeader>
                                 <AlertDialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Delete Item?</AlertDialogTitle>
-                                <AlertDialogDescription className="text-zinc-500 font-medium">This record will be permanently purged from the master inventory.</AlertDialogDescription>
+                                <AlertDialogDescription className="text-zinc-500 font-medium">This record will be permanently purged from the master inventory and cloud storage.</AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter className="mt-6 gap-2">
                                 <AlertDialogCancel className="rounded-full font-bold">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(item.id)} className="rounded-full bg-red-600 font-bold">Purge Record</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDelete(item)} className="rounded-full bg-red-600 font-bold">Purge Record</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -190,7 +252,6 @@ export default function ProductAdminPage() {
         </div>
       </main>
 
-      {/* DRAWER WITH NATIVE SELECTS */}
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
         <DrawerContent className="rounded-t-[40px] border-none shadow-2xl max-h-[95vh] outline-none">
           <div className="mx-auto w-full max-w-2xl px-6 py-12 md:px-12 overflow-y-auto outline-none">
@@ -207,14 +268,20 @@ export default function ProductAdminPage() {
             </header>
 
             <div className="space-y-8">
-              {/* Media Section */}
               <div className="flex items-center gap-6 p-6 bg-zinc-50 rounded-[24px] border border-zinc-100/50">
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-28 w-28 shrink-0 rounded-2xl bg-white border-2 border-dashed border-zinc-200 flex items-center justify-center overflow-hidden cursor-pointer hover:border-zinc-900 transition-all group"
+                  className="relative h-28 w-28 shrink-0 rounded-2xl bg-white border-2 border-dashed border-zinc-200 flex items-center justify-center overflow-hidden cursor-pointer hover:border-zinc-900 transition-all group"
                 >
                   {formData.image ? (
-                    <img src={formData.image} className="h-full w-full object-cover" alt="" />
+                    <>
+                      <img src={formData.image} className="h-full w-full object-cover" alt="" />
+                      {uploadProgress > 0 && uploadProgress < 100 && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] text-white font-bold">
+                          {Math.round(uploadProgress)}%
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="text-center space-y-1">
                        <ImageIcon className="mx-auto text-zinc-300 group-hover:scale-110 transition-transform" />
@@ -224,14 +291,12 @@ export default function ProductAdminPage() {
                 </div>
                 <div className="flex-1 space-y-1">
                   <Label className="text-[10px] font-black uppercase text-zinc-900">Visual Identity</Label>
-                  <p className="text-xs text-zinc-500 leading-tight">Provide a clear representation of the product for the catalog.</p>
-                  <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
+                  <p className="text-xs text-zinc-500 leading-tight">Image will be hosted on EdgeStore (Emablini bucket).</p>
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                 </div>
               </div>
 
-              {/* Core Fields Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* NATIVE CATEGORY SELECT */}
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase text-zinc-400 flex items-center gap-2">
                     <Tag className="w-3 h-3"/> Category
@@ -292,7 +357,6 @@ export default function ProductAdminPage() {
                 />
               </div>
 
-              {/* Hardware Specs Section */}
               <div className="space-y-4">
                  <div className="flex justify-between items-center border-b border-zinc-100 pb-3">
                     <Label className="text-[10px] font-black uppercase text-zinc-900 flex items-center gap-2"><Hash className="w-3 h-3"/> Technical Parameters</Label>
@@ -343,7 +407,14 @@ export default function ProductAdminPage() {
                 disabled={isSubmitting} 
                 className="w-full h-20 rounded-[28px] bg-zinc-900 text-white hover:bg-black font-black uppercase italic tracking-[0.2em] shadow-2xl transition-all active:scale-[0.98] mb-10"
               >
-                {isSubmitting ? <Loader2 className="animate-spin" /> : "Authorize & Save"}
+                {isSubmitting ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="animate-spin h-5 w-5 mb-1" />
+                    <span className="text-[10px] normal-case font-bold italic">
+                      {uploadProgress > 0 && uploadProgress < 100 ? `Uploading ${Math.round(uploadProgress)}%` : "Saving Record..."}
+                    </span>
+                  </div>
+                ) : "Authorize & Save"}
               </Button>
             </div>
           </div>

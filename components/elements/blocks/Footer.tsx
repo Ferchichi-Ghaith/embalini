@@ -57,7 +57,7 @@ const Footer = ({ userAccountType = "INDIVIDUAL" }: FooterProps) => {
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-[18vw] font-extralight leading-[0.7] tracking-tighter text-[#94C973] uppercase select-none flex justify-between items-baseline"
           >
-            Emba<span className="font-serif italic lowercase opacity-80">l</span>ini
+            Emba<span className="font-serif italic lowercase ">l</span>ini
           </motion.h2>
         </div>
 
@@ -110,7 +110,7 @@ const Footer = ({ userAccountType = "INDIVIDUAL" }: FooterProps) => {
 
           {/* CTA Section */}
           <motion.div {...fadeInUp} transition={{ delay: 0.3 }} className="flex flex-col justify-end">
-            <a href="#contact" className="group relative p-10 rounded-3xl bg-[#94C973] text-[#0D2C30] overflow-hidden transition-transform active:scale-95">
+            <a href="/products" className="group relative p-10 rounded-3xl bg-[#94C973] text-[#0D2C30] overflow-hidden transition-transform active:scale-95">
               <div className="relative z-10 flex flex-col gap-4">
                 <Star size={24} className="fill-[#0D2C30]" />
                 <span className="text-xl font-black uppercase tracking-tighter leading-none">
@@ -134,10 +134,11 @@ const Footer = ({ userAccountType = "INDIVIDUAL" }: FooterProps) => {
           <div className="flex items-center gap-4">
             <span className="text-[9px] font-bold uppercase tracking-widest text-white/20 italic">Direction Artistique par</span>
             <a 
-              href="https://wa.me/21621104800" 
+            target='_blank'
+              href="https://www.zoz.tn" 
               className="px-6 py-2 rounded-full border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-[#0D2C30] transition-all duration-700 shadow-2xl"
             >
-              Ghaith Ferchiochi
+             ZOZ
             </a>
           </div>
         </div>

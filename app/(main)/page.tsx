@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import EmbaliniHero from '@/components/elements/blocks/Hero';
 import CategorySection from '@/components/elements/blocks/Category';
 import { ProcessSection } from '@/components/elements/blocks/procces';
+import GreenEmbaliniSection from '@/components/elements/blocks/GreenEmbaliniSection';
+import CSRQuoteSection from '@/components/elements/blocks/wordofday';
+import SustainabilityFocus from '@/components/elements/blocks/mainblock';
 
 // Définition de l'interface basée sur votre API
 interface Product {
@@ -38,7 +41,8 @@ const Page = () => {
     <main className="min-h-screen bg-[#FBFBFB]">
       <EmbaliniHero />
       <CategorySection/>
-      <ProcessSection/>
+ 
+      <SustainabilityFocus/>
       
     </main>
   );
